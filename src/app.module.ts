@@ -1,8 +1,9 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { CustomersModule } from './customers/customers.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { CustomersModule } from './customers/customers.module';
+import { Customer } from './entities/Customer.entity';
 
 @Module({
   imports: [
@@ -13,7 +14,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
       username: 'root',
       password: '',
       database: 'courier',
-      entities: [],
+      // entities: [__dirname + '/entities/*.ts'], // Path to your entity files
+      entities: [Customer],
       synchronize: true,
     }),
     CustomersModule,

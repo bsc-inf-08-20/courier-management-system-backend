@@ -16,7 +16,7 @@ export class Customer {
   @Column({ unique: true }) // A unique email column
   email: string;
 
-  @Column({ length: 15 }) // A string column for phone numbers
+  @Column({ length: 10 }) // A string column for phone numbers
   phone_number: string;
 
   @Column('text') // A column for long text (e.g., address)
