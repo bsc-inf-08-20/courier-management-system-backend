@@ -16,6 +16,9 @@ export class Customer {
   @Column({ unique: true }) // A unique email column
   email: string;
 
+  @Column({ unique: true })
+  password: string;
+
   @Column({ length: 10 }) // A string column for phone numbers
   phone_number: string;
 
