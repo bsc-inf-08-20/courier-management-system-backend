@@ -6,9 +6,9 @@ import {
 } from 'typeorm';
 
 @Entity() // Marks this class as a database table
-export class Customer {
+export class User {
   @PrimaryGeneratedColumn() // Auto-incremented primary key
-  customer_id: number;
+  user_id: number;
 
   @Column({ length: 100 }) // A string column with a max length of 100
   name: string;
