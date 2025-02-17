@@ -21,7 +21,7 @@ export class UsersController {
   // Get a single user by ID
   @Get(':id')
   async findOne(@Param('id') id: number): Promise<User | null> {
-    return this.usersService.findOne(id);
+    return this.usersService.findUserById(id);
   }
 
   // Delete a user by ID
