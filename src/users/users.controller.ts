@@ -2,6 +2,7 @@ import { Controller, Get, Param, Delete, Post, Body } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { User } from 'src/entities/User.entity';
 import { CreateUserDto } from './dto/CreateUser.dto';
+import { Public } from 'src/decorators/public.decorator';
 
 @Controller('users') // Base route: /customers
 export class UsersController {
@@ -13,6 +14,7 @@ export class UsersController {
   }
 
   // Get all users
+  @Public()
   @Get()
   async findAll(): Promise<User[]> {
     return this.usersService.findAll();
