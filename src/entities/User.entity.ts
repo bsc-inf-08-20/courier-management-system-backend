@@ -1,3 +1,4 @@
+import { Role } from 'src/enum/role.enum';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -16,7 +17,7 @@ export class User {
   @Column({ unique: true }) // A unique email column
   email: string;
 
-  @Column({ unique: true })
+  @Column({ unique: false })
   password: string;
 
   @Column({ length: 10 }) // A string column for phone numbers
@@ -24,6 +25,13 @@ export class User {
 
   @Column('text') // A column for long text (e.g., address)
   address: string;
+
+  @Column({
+    type: 'enum',
+    enum: Role,
+    default: Role.USER,
+  })
+  role: Role;
 
   @CreateDateColumn() // Automatically stores when the record is created
   created_at: Date;

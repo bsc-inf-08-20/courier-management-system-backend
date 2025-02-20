@@ -3,6 +3,8 @@ import { UsersService } from './users.service';
 import { User } from 'src/entities/User.entity';
 import { CreateUserDto } from './dto/CreateUser.dto';
 import { Public } from 'src/decorators/public.decorator';
+import { Roles } from 'src/decorators/roles.decorator';
+import { Role } from 'src/enum/role.enum';
 
 @Controller('users') // Base route: /customers
 export class UsersController {
@@ -14,7 +16,6 @@ export class UsersController {
   }
 
   // Get all users
-  @Public()
   @Get()
   async findAll(): Promise<User[]> {
     return this.usersService.findAll();
