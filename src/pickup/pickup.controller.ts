@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Body, Param, UseGuards, Request } from '@nestjs/common';
+import { Controller, Post, Get, Body, Param, UseGuards, Request, Patch } from '@nestjs/common';
 import { PickupService } from './pickup.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { Roles } from '../decorators/roles.decorator';
@@ -32,5 +32,13 @@ export class PickupController {
   @Get('assigned')
   async getAssignedPickups(@Request() req) {
     return this.pickupService.getAgentPickups(req.user.userId);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.AGENT ) // 🔒 Only agents can access this
+  @Patch(':pickupId/deliver')
+  async markAsDelivered(@Param('pickupId') pickupId: number, @Request() req) {
+    //console.log(pickupId, req.user.user_id)
+    return this.pickupService.markAsDelivered(pickupId, req.user.user_id);
   }
 }

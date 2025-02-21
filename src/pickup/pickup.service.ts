@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { PickupRequest } from '../entities/PickupRequest.entity';
@@ -48,6 +48,25 @@ export class PickupService {
   // Agent views assigned pickups
   async getAgentPickups(agentId: number): Promise<PickupRequest[]> {
     return this.pickupRepository.find({ where: { assigned_agent: { user_id: agentId } } });
+  }
+
+   // ✅ Method for agent to mark pickup as delivered
+   async markAsDelivered(pickupId: number, agentId: number): Promise<PickupRequest> {
+    const pickup = await this.pickupRepository.findOne({
+      where: { id: pickupId },
+      relations: ['assigned_agent'],
+    });
+
+    if (!pickup) {
+      throw new NotFoundException('Pickup request not found');
+    }
+
+    if (!pickup.assigned_agent || pickup.assigned_agent.user_id !== agentId) {
+      throw new ForbiddenException('You are not assigned to this pickup');
+    }
+
+    pickup.status = 'delivered';
+    return this.pickupRepository.save(pickup);
   }
 }
 
