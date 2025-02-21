@@ -5,6 +5,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './entities/User.entity';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
+import { PickupModule } from './pickup/pickup.module';
+import { PickupRequest } from './entities/PickupRequest.entity';
 
 @Module({
   imports: [
@@ -16,11 +18,12 @@ import { UsersModule } from './users/users.module';
       password: '',
       database: 'courier',
       // entities: [__dirname + '/entities/*.ts'], // Path to your entity files
-      entities: [User],
+      entities: [User, PickupRequest],
       synchronize: true,
     }),
     UsersModule,
     AuthModule,
+    PickupModule,
   ],
   controllers: [AppController],
   providers: [AppService],

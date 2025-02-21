@@ -6,7 +6,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/entities/User.entity';
 import { Repository } from 'typeorm';
-import { CreateUserDto } from './dto/CreateUser.dto';
+import { CreateUserDto } from '../dto/CreateUser.dto';
 import { encodePassword } from 'src/resources/bcrypt';
 
 @Injectable()
@@ -65,5 +65,9 @@ export class UsersService {
 
   async remove(id: number): Promise<void> {
     await this.userRepository.delete(id);
+  }
+
+  async deleteAllUsers(): Promise<void> {
+    await this.userRepository.delete({}); 
   }
 }

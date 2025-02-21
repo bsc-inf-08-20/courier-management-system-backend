@@ -4,7 +4,9 @@ import {
   PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
+  OneToMany,
 } from 'typeorm';
+import { PickupRequest } from './PickupRequest.entity';
 
 @Entity() // Marks this class as a database table
 export class User {
@@ -32,6 +34,12 @@ export class User {
     default: Role.USER,
   })
   role: Role;
+
+  @OneToMany(() => PickupRequest, (pickup) => pickup.customer)
+  pickups: PickupRequest[];
+
+  @OneToMany(() => PickupRequest, (pickup) => pickup.assigned_agent, { cascade: true })
+  assignedPickups: PickupRequest[]; // ✅ If an agent is deleted, set pickups to NULL
 
   @CreateDateColumn() // Automatically stores when the record is created
   created_at: Date;
