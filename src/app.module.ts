@@ -7,6 +7,7 @@ import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { PickupModule } from './pickup/pickup.module';
 import { PickupRequest } from './entities/PickupRequest.entity';
+import { Packet } from './entities/Packet.entity';
 
 @Module({
   imports: [
@@ -16,9 +17,9 @@ import { PickupRequest } from './entities/PickupRequest.entity';
       port: 3306,
       username: 'root',
       password: '',
-      database: 'courier',
+      database: 'courier_db',
       // entities: [__dirname + '/entities/*.ts'], // Path to your entity files
-      entities: [User, PickupRequest],
+      entities: [User, PickupRequest, Packet],
       synchronize: true,
     }),
     UsersModule,
