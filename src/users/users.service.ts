@@ -8,6 +8,8 @@ import { User } from 'src/entities/User.entity';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from '../dto/CreateUser.dto';
 import { encodePassword } from 'src/resources/bcrypt';
+import { UpdateUserDto } from 'src/dto/update-user.dto';
+import { Role } from 'src/enum/role.enum';
 
 @Injectable()
 export class UsersService {
@@ -63,11 +65,31 @@ export class UsersService {
     return User;
   };
 
+  //update a user
+  async updateUser(id: number, updateDto: UpdateUserDto): Promise<User> {
+    const user = await this.userRepository.findOne({ where: { user_id: id } });
+
+    if (!user) {
+      throw new NotFoundException("User not found");
+    }
+
+    Object.assign(user, updateDto); // ✅ Merge updates
+    return this.userRepository.save(user); // ✅ Save changes
+  }
+
   async remove(id: number): Promise<void> {
     await this.userRepository.delete(id);
   }
 
+  
+// delete all users
   async deleteAllUsers(): Promise<void> {
     await this.userRepository.delete({}); 
+  }
+
+
+  // get by user by role
+  async getUsersByRole(role: Role): Promise<User[]> {
+    return this.userRepository.find({ where: { role } });
   }
 }

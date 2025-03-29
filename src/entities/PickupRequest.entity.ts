@@ -1,5 +1,6 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, OneToMany, OneToOne, JoinColumn } from 'typeorm';
 import { User } from './User.entity';
+import { Packet } from './Packet.entity';
 
 @Entity()
 export class PickupRequest {
@@ -12,6 +13,8 @@ export class PickupRequest {
   @Column()
   pickup_address: string;
 
+  @Column()
+  destination_address: string; 
 
   @Column({ default: 'pending' }) // 'pending', 'assigned', 'completed'
   status: string;
@@ -19,6 +22,9 @@ export class PickupRequest {
   @ManyToOne(() => User, (user) => user.assignedPickups, { onDelete: 'SET NULL', nullable: true })
   assigned_agent: User | null; 
 
+  @OneToOne(() => Packet, { cascade: true, eager: true }) 
+  @JoinColumn() // ✅ Ensures a single packet per pickup request
+  packet: Packet;
 
   @CreateDateColumn()
   created_at: Date;
