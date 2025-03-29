@@ -5,13 +5,13 @@ export class AgentConfirmPickup {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column('varchar', { length: 255 })
   goodsId: string;
 
-  @Column()
+  @Column('varchar', { length: 255 })
   customerName: string;
 
-  @Column('decimal')
+  @Column('decimal', { precision: 10, scale: 2, name: 'weight(kgs)' })
   weight: number;
 
   @CreateDateColumn()
