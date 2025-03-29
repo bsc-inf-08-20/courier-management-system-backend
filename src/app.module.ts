@@ -8,6 +8,7 @@ import { UsersModule } from './users/users.module';
 import { PickupModule } from './pickup/pickup.module';
 import { PickupRequest } from './entities/PickupRequest.entity';
 import { Packet } from './entities/Packet.entity';
+import { PacketsModule } from './packets/packets.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { Packet } from './entities/Packet.entity';
     UsersModule,
     AuthModule,
     PickupModule,
+    PacketsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

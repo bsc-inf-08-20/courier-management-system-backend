@@ -25,8 +25,14 @@ export class User {
   @Column({ length: 10 }) // A string column for phone numbers
   phone_number: string;
 
-  @Column('text') // A column for long text (e.g., address)
-  address: string;
+  // @Column('text') // A column for long text (e.g., address)
+  // address: string;
+
+  @Column({ length: 50 }) // New column to store the city
+  city: string;
+
+  @Column({ length: 50 }) // New column to store the city
+  area: string;
 
   @Column({
     type: 'enum',
