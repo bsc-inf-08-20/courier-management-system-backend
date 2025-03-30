@@ -11,7 +11,7 @@ export class AgentConfirmPickup {
   @Column('varchar', { length: 255 })
   customerName: string;
 
-  @Column('decimal', { precision: 10, scale: 2, name: 'weight(kgs)' })
+  @Column('decimal', { precision: 10, scale: 1, name: 'weight(kgs)' })
   weight: number;
 
   @CreateDateColumn()
@@ -22,4 +22,5 @@ export class AgentConfirmPickup {
 
   @Column({ default: 'pending' })
   status: string;  // Default status is 'pending'
+  weightInKgs: number;
 }
