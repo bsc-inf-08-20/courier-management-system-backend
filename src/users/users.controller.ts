@@ -35,6 +35,14 @@ export class UsersController {
     return this.usersService.getAdminCity(req.user.user_id);
   }
 
+  // get all your details
+  @UseGuards(JwtAuthGuard)
+  @Get('me-data')
+  async getMe(@Request() req) {
+    return this.usersService.findOne(req.user.user_id);
+  }
+
+
   // Get all users
   @Get()
   async findAll(): Promise<User[]> {

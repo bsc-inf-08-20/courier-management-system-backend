@@ -73,20 +73,59 @@ export class PacketsService {
     });
   }
 
-  async agentConfirmCollection(packetId: number, agentId: number): Promise<Packet> {
-    const packet = await this.packetRepository.findOne({
-      where: { id: packetId },
-      relations: ['pickup', 'pickup.assigned_agent'],
-    });
 
-    if (!packet) throw new NotFoundException('Packet not found');
-    if (!packet.pickup) throw new NotFoundException('Pickup request not found');
-    if (packet.pickup.assigned_agent?.user_id !== agentId) {
-      throw new ForbiddenException('You are not assigned to this pickup');
+  //comfim the collection 
+  // async agentConfirmCollection(packetId: number, agentId: number, weight?: number): Promise<Packet> {
+  //   const packet = await this.packetRepository.findOne({
+  //     where: { id: packetId },
+  //     relations: ['pickup', 'pickup.assigned_agent'],
+  //   });
+
+  //   if (!packet) throw new NotFoundException('Packet not found');
+  //   if (!packet.pickup) throw new NotFoundException('Pickup request not found');
+  //   if (packet.pickup.assigned_agent?.user_id !== agentId) {
+  //     throw new ForbiddenException('You are not assigned to this pickup');
+  //   }
+
+  //   if (packet.status !== 'pending') {
+  //     throw new ForbiddenException('Packet is not in a state to be collected');
+  //   }
+
+  //   // Update weight if provided and valid
+  //   if (weight !== undefined) {
+  //     if (weight <= 0) {
+  //       throw new ForbiddenException('Weight must be greater than 0');
+  //     }
+  //     packet.weight = weight;
+  //   }
+
+  //   packet.status = 'collected';
+  //   packet.collected_at = new Date();
+  //   return this.packetRepository.save(packet);
+  // }
+
+  async updateWeight(id: number, weight: number): Promise<Packet> {
+    const packet = await this.packetRepository.findOneBy({ id });
+    if (!packet) {
+      throw new Error('Packet not found');
     }
 
+    packet.weight = weight;
+    return this.packetRepository.save(packet);
+  }
+
+  async agentConfirmCollection(id: number, weight?: number): Promise<Packet> {
+    const packet = await this.packetRepository.findOneBy({ id });
+    if (!packet) {
+      throw new Error('Packet not found');
+    }
+
+    if (weight) {
+      packet.weight = weight;
+    }
     packet.status = 'collected';
     packet.collected_at = new Date();
+
     return this.packetRepository.save(packet);
   }
 

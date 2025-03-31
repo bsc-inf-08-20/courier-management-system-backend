@@ -18,6 +18,7 @@ export class UsersService {
     private userRepository: Repository<User>,
   ) {}
 
+  // create a user
   createUser = async (userContent: CreateUserDto) => {
     // Check if user already exists
     const existingUser = await this.userRepository.findOneBy({
@@ -65,6 +66,14 @@ export class UsersService {
 
     return User;
   };
+
+  async findOne(userId: number): Promise<User> {
+    const user = await this.userRepository.findOne({ where: { user_id: userId } });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return user;
+  }
 
   findUserByEmail = async (email: string): Promise<User> => {
     const User = await this.userRepository.findOneBy({
@@ -114,5 +123,4 @@ export class UsersService {
       select: ['user_id', 'name', 'email', 'phone_number', 'city'],
     });
   }
-
 }

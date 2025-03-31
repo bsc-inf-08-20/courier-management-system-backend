@@ -11,6 +11,9 @@ export class AgentConfirmPickup {
   @Column('varchar', { length: 255 })
   customerName: string;
 
+  @Column('varchar', { length: 255 })
+  location: string;
+
   @Column('decimal', { precision: 10, scale: 1, name: 'weight(kgs)' })
   weight: number;
 

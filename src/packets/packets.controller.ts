@@ -1,9 +1,22 @@
-import { Body, Controller, Get, Param, Patch, Post, Request, UseGuards } from '@nestjs/common';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Get,
+  HttpException,
+  HttpStatus,
+  Param,
+  Patch,
+  Post,
+  Request,
+  UseGuards,
+} from '@nestjs/common';
 import { PacketsService } from './packets.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { Roles } from 'src/decorators/roles.decorator';
 import { Role } from 'src/enum/role.enum';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
+import { UpdatePacketWeightDto } from 'src/dto/update-packet-weight.dto';
 
 @Controller('packets')
 export class PacketsController {
@@ -14,7 +27,6 @@ export class PacketsController {
   async getAllPackets() {
     return this.packetsService.getAllPackets();
   }
-
 
   //get admins packet
   @Get('admin')
@@ -30,14 +42,55 @@ export class PacketsController {
     return this.packetsService.confirmPacketDispatch(id);
   }
 
-  @Patch(':id/agent-confirm')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.AGENT)
-  async agentConfirmCollection(
-    @Param('id') id: string, @Request() req,
+  
+  @Patch(':id/weight')
+  async updateWeight(
+    @Param('id') id: string,
+    @Body() updatePacketWeightDto: UpdatePacketWeightDto,
   ) {
-    return this.packetsService.agentConfirmCollection(parseInt(id), req.user.user_id);
+    if (isNaN(Number(id))) {
+      throw new BadRequestException('Invalid packet ID');
+    }
+    if (updatePacketWeightDto.weight <= 0) {
+      throw new BadRequestException('Weight must be greater than 0');
+    }
+
+    return this.packetsService.updateWeight(+id, updatePacketWeightDto.weight);
   }
+
+
+  @Patch(':id/agent-confirm')
+  async agentConfirmCollection(
+    @Param('id') id: string,
+    @Body() updatePacketDto: UpdatePacketWeightDto,
+  ) {
+    if (isNaN(Number(id))) {
+      throw new BadRequestException('Invalid packet ID');
+    }
+
+    return this.packetsService.agentConfirmCollection(+id, updatePacketDto.weight);
+  }
+
+  // @Patch(':id/agent-confirm')
+  // @UseGuards(JwtAuthGuard, RolesGuard)
+  // @Roles(Role.AGENT)
+  // async agentConfirmCollection(
+  //   @Param('id') id: string,
+  //   @Request() req,
+  //   @Body('weight') weight?: number,
+  // ) {
+  //   if (!req.user || !req.user.user_id) {
+  //     throw new HttpException(
+  //       'Unauthorized: User not authenticated',
+  //       HttpStatus.UNAUTHORIZED,
+  //     );
+  //   }
+  //   return this.packetsService.agentConfirmCollection(
+  //     parseInt(id),
+  //     req.user.user_id,
+  //     weight,
+  //   );
+  // }
 
   @Patch(':id/hub-confirm')
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -63,20 +116,14 @@ export class PacketsController {
   @Patch(':id/out-for-delivery')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.AGENT)
-  async markOutForDelivery(
-    @Param('id') id: string,
-    @Request() req,
-  ) {
+  async markOutForDelivery(@Param('id') id: string, @Request() req) {
     return this.packetsService.markOutForDelivery(parseInt(id));
   }
 
   @Patch(':id/delivered')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.AGENT)
-  async markAsDelivered(
-    @Param('id') id: string,
-    @Request() req,
-  ) {
+  async markAsDelivered(@Param('id') id: string, @Request() req) {
     return this.packetsService.markAsDelivered(parseInt(id));
   }
 
@@ -89,9 +136,12 @@ export class PacketsController {
   @Post('dispatch-batch')
   @Roles(Role.ADMIN)
   async dispatchBatch(
-    @Body() body: { packetIds: number[]; driverId: number; vehicleId: number }
+    @Body() body: { packetIds: number[]; driverId: number; vehicleId: number },
   ) {
-    return this.packetsService.dispatchBatch(body.packetIds, body.driverId, body.vehicleId);
+    return this.packetsService.dispatchBatch(
+      body.packetIds,
+      body.driverId,
+      body.vehicleId,
+    );
   }
-
 }
