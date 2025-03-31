@@ -1,8 +1,10 @@
-import { ConflictException, ForbiddenException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, ForbiddenException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Like, Not, Repository } from 'typeorm';
+import { In, Like, Not, Repository } from 'typeorm';
 import { Packet } from 'src/entities/Packet.entity';
 import { User } from 'src/entities/User.entity';
+import { Vehicle } from 'src/entities/Vehicle.entity';
+import { Role } from 'src/enum/role.enum';
 
 @Injectable()
 export class PacketsService {
@@ -11,6 +13,8 @@ export class PacketsService {
     private readonly packetRepository: Repository<Packet>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    @InjectRepository(Vehicle)
+        private readonly vehicleRepository: Repository<Vehicle>,
   ) {}
 
   // Fetch all packets from DB
@@ -45,6 +49,7 @@ export class PacketsService {
   //   });
   // }
 
+  // get packets based on the city of the admin (origin and destination<after confirmed>)
   async getPacketsForAdmin(adminId: number): Promise<Packet[]> {
     const admin = await this.userRepository.findOne({ 
       where: { user_id: adminId },
@@ -186,6 +191,42 @@ export class PacketsService {
     return this.packetRepository.save(packet);
   }
 
+  async dispatchBatch(packetIds: number[], driverId: number, vehicleId: number): Promise<Packet[]> {
+    // Use the In operator to find packets by their IDs
+    const packets = await this.packetRepository.find({ where: { id: In(packetIds) } });
+    if (packets.length !== packetIds.length) {
+      throw new NotFoundException('One or more packets not found');
+    }
+
+    const driver = await this.userRepository.findOne({ where: { user_id: driverId, role: Role.DRIVER } });
+    if (!driver) throw new NotFoundException('Driver not found');
+
+    const vehicle = await this.vehicleRepository.findOne({ where: { id: vehicleId } });
+    if (!vehicle || !vehicle.is_active || vehicle.is_in_maintenance) {
+      throw new NotFoundException('Vehicle not found or unavailable');
+    }
+
+    const totalWeight = packets.reduce((sum, p) => sum + p.weight, 0);
+    if (totalWeight > vehicle.capacity) {
+      throw new BadRequestException(
+        `Total weight (${totalWeight}kg) exceeds vehicle capacity (${vehicle.capacity}kg)`
+      );
+    }
+
+    for (const packet of packets) {
+      if (packet.status !== 'at_origin_hub') {
+        throw new BadRequestException(`Packet ${packet.id} is not ready for dispatch`);
+      }
+      packet.status = 'in_transit';
+      packet.assigned_driver = driver;
+      packet.assigned_vehicle = vehicle;
+      packet.dispatched_at = new Date();
+    }
+
+    vehicle.assigned_driver = driver;
+    await this.vehicleRepository.save(vehicle);
+    return this.packetRepository.save(packets);
+  }
  
   
 }

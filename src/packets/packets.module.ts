@@ -5,10 +5,12 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Packet } from 'src/entities/Packet.entity';
 import { User } from 'src/entities/User.entity';
 import { PickupRequest } from 'src/entities/PickupRequest.entity';
+import { Vehicle } from 'src/entities/Vehicle.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([PickupRequest, User, Packet])],
+  imports: [TypeOrmModule.forFeature([PickupRequest, User, Packet, Vehicle])],
   providers: [PacketsService],
-  controllers: [PacketsController]
+  controllers: [PacketsController],
+  exports: [PacketsService],
 })
 export class PacketsModule {}

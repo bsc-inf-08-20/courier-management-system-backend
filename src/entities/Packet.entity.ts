@@ -1,5 +1,14 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToOne } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  OneToOne,
+  JoinColumn,
+  ManyToOne,
+} from 'typeorm';
 import { PickupRequest } from './PickupRequest.entity';
+import { User } from './User.entity';
+import { Vehicle } from './Vehicle.entity';
 
 @Entity()
 export class Packet {
@@ -13,13 +22,13 @@ export class Packet {
     type: 'enum',
     enum: [
       'pending',
-      'collected',       // Agent collected
-      'at_origin_hub',   // At origin hub (changed from 'at_hub')
-      'in_transit',      // Dispatched for transport
+      'collected', // Agent collected
+      'at_origin_hub', // At origin hub (changed from 'at_hub')
+      'in_transit', // Dispatched for transport
       'at_destination_hub', // At destination hub
       'out_for_delivery', // With delivery agent
-      'delivered',       // Delivered to recipient
-      'received'         // Recipient confirmed
+      'delivered', // Delivered to recipient
+      'received', // Recipient confirmed
     ],
     default: 'pending',
   })
@@ -47,7 +56,7 @@ export class Packet {
   received_at: Date;
 
   @Column({ nullable: true })
-  hub_confirmed_at: Date
+  hub_confirmed_at: Date;
 
   @Column('float')
   weight: number;
@@ -65,6 +74,19 @@ export class Packet {
     onDelete: 'CASCADE',
   })
   pickup: PickupRequest;
+
+  // Add to your Packet entity
+  @ManyToOne(() => User, { nullable: true })
+  @JoinColumn()
+  assigned_driver: User;
+
+  @ManyToOne(() => Vehicle, { nullable: true })
+  @JoinColumn()
+  assigned_vehicle: Vehicle;
+
+  // Add fields to track dispatch timing
+  // @Column({ nullable: true })
+  // dispatched_at: Date;
 
   @Column({ default: false }) // ✅ Only allow Mzuzu to see confirmed packets
   confirmed_by_origin: boolean;

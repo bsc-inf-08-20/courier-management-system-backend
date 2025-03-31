@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ForbiddenException,
   Injectable,
   NotFoundException,
@@ -110,37 +111,70 @@ export class PickupService {
   //   return this.pickupRepository.save(pickup);
   // }
 
-  async assignAgent(requestId: number, agentId: number) {
-    const pickupRequest = await this.pickupRepository.findOne({
-      where: { id: requestId },
-      relations: ['assigned_agent'], // Ensure we include the agent relation
-    });
+  // async assignAgent(requestId: number, agentId: number) {
+  //   const pickupRequest = await this.pickupRepository.findOne({
+  //     where: { id: requestId },
+  //     relations: ['assigned_agent'], // Ensure we include the agent relation
+  //   });
 
-    if (!pickupRequest) {
-      throw new NotFoundException(
-        `Pickup request with ID ${requestId} not found`,
-      );
+  //   if (!pickupRequest) {
+  //     throw new NotFoundException(
+  //       `Pickup request with ID ${requestId} not found`,
+  //     );
+  //   }
+
+  //   const agent = await this.userRepository.findOne({
+  //     where: { user_id: agentId, role: Role.AGENT },
+  //   });
+
+  //   if (!agent) {
+  //     throw new NotFoundException(
+  //       `Agent with ID ${agentId} not found or is not an agent`,
+  //     );
+  //   }
+
+  //   pickupRequest.assigned_agent = agent;
+  //   pickupRequest.status = 'assigned';
+
+  //   await this.pickupRepository.save(pickupRequest);
+
+  //   return {
+  //     message: 'Agent assigned successfully',
+  //     pickup_request: pickupRequest,
+  //   };
+  // }
+
+  async assignAgent(requestId: number, agentId: number, adminId: number): Promise<PickupRequest> {
+    const [pickupRequest, agent, admin] = await Promise.all([
+      this.pickupRepository.findOne({
+        where: { id: requestId },
+        relations: ['packet', 'assigned_agent']
+      }),
+      this.userRepository.findOne({
+        where: { user_id: agentId }
+      }),
+      this.userRepository.findOne({
+        where: { user_id: adminId }
+      })
+    ]);
+  
+    if (!pickupRequest) throw new NotFoundException('Pickup request not found');
+    if (!agent || agent.role !== Role.AGENT) throw new NotFoundException('Agent not found');
+    if (!admin) throw new NotFoundException('Admin not found');
+  
+    // Verify packet is from admin's city
+    if (!pickupRequest.packet.origin_address.includes(admin.city)) {
+      throw new ForbiddenException('You can only assign agents to packets from your city');
     }
-
-    const agent = await this.userRepository.findOne({
-      where: { user_id: agentId, role: Role.AGENT },
-    });
-
-    if (!agent) {
-      throw new NotFoundException(
-        `Agent with ID ${agentId} not found or is not an agent`,
-      );
+  
+    // Verify agent is from the same city
+    if (agent.city !== admin.city) {
+      throw new ForbiddenException('You can only assign agents from your city');
     }
-
+  
     pickupRequest.assigned_agent = agent;
     pickupRequest.status = 'assigned';
-
-    await this.pickupRepository.save(pickupRequest);
-
-    return {
-      message: 'Agent assigned successfully',
-      pickup_request: pickupRequest,
-    };
+    return this.pickupRepository.save(pickupRequest);
   }
 
   // Agent views assigned pickups
@@ -150,31 +184,73 @@ export class PickupService {
     });
   }
 
-  // ✅ Method for agent to mark pickup as delivered
+  //  Method for agent to mark pickup as delivered
+  // async markAsDelivered(
+  //   pickupId: number,
+  //   agentId: number,
+  // ): Promise<PickupRequest> {
+  //   const pickup = await this.pickupRepository.findOne({
+  //     where: { id: pickupId },
+  //     relations: ['assigned_agent'],
+  //   });
+
+  //   if (!pickup) {
+  //     throw new NotFoundException('Pickup request not found');
+  //   }
+
+  //   if (!pickup.assigned_agent || pickup.assigned_agent.user_id !== agentId) {
+  //     throw new ForbiddenException('You are not assigned to this pickup');
+  //   }
+
+  //   pickup.status = 'at_origin_hub';
+  //   return this.pickupRepository.save(pickup);
+  // }
+
   async markAsDelivered(
     pickupId: number,
     agentId: number,
   ): Promise<PickupRequest> {
     const pickup = await this.pickupRepository.findOne({
       where: { id: pickupId },
-      relations: ['assigned_agent'],
+      relations: ['assigned_agent', 'packet'], // Add 'packet' to relations
     });
-
+  
     if (!pickup) {
       throw new NotFoundException('Pickup request not found');
     }
-
-    if (!pickup.assigned_agent || pickup.assigned_agent.user_id !== agentId) {
-      throw new ForbiddenException('You are not assigned to this pickup');
+  
+    // if (!pickup.assigned_agent || pickup.assigned_agent.user_id !== agentId) {
+    //   throw new ForbiddenException('You are not assigned to this pickup');
+    // }
+  
+    // Update pickup request status
+    pickup.status = 'at_origin_hub';
+  
+    // Update related packet status if it exists
+    if (pickup.packet) {
+      pickup.packet.status = 'at_origin_hub';
+      pickup.packet.origin_hub_confirmed_at = new Date();
+      await this.packetRepository.save(pickup.packet);
     }
-
-    pickup.status = 'delivered';
+  
     return this.pickupRepository.save(pickup);
   }
+
 
   async getAllPickupRequests(): Promise<PickupRequest[]> {
     return this.pickupRepository.find({
       relations: ['customer', 'assigned_agent', 'packet'], // Include related entities
+    });
+  }
+
+  async getPickupRequestsByCity(city: string) {
+    if (!city) {
+      throw new BadRequestException('City is required');
+    }
+
+    return this.pickupRepository.find({
+      where: { pickup_address: city },
+      relations: ['customer', 'assigned_agent', 'packet'],
     });
   }
 

@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Patch, Request, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Request, UseGuards } from '@nestjs/common';
 import { PacketsService } from './packets.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { Roles } from 'src/decorators/roles.decorator';
@@ -9,7 +9,7 @@ import { RolesGuard } from 'src/auth/guards/roles.guard';
 export class PacketsController {
   constructor(private readonly packetsService: PacketsService) {}
 
-  // GET /packets
+  // GET all packets
   @Get()
   async getAllPackets() {
     return this.packetsService.getAllPackets();
@@ -86,6 +86,12 @@ export class PacketsController {
     return this.packetsService.confirmReceiverReceived(parseInt(id));
   }
 
-  
+  @Post('dispatch-batch')
+  @Roles(Role.ADMIN)
+  async dispatchBatch(
+    @Body() body: { packetIds: number[]; driverId: number; vehicleId: number }
+  ) {
+    return this.packetsService.dispatchBatch(body.packetIds, body.driverId, body.vehicleId);
+  }
 
 }

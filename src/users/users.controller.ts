@@ -6,7 +6,9 @@ import {
   Post,
   Body,
   UseGuards,
+  Request,
   Patch,
+  Query,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { User } from 'src/entities/User.entity';
@@ -26,10 +28,25 @@ export class UsersController {
     return this.usersService.createUser(createCustomerDto);
   }
 
+  // get the city of the admin
+  @Get('me')
+  @UseGuards(JwtAuthGuard)
+  async getAdminCity(@Request() req) {
+    return this.usersService.getAdminCity(req.user.user_id);
+  }
+
   // Get all users
   @Get()
   async findAll(): Promise<User[]> {
     return this.usersService.findAll();
+  }
+
+  // get agents by admin's city
+  @Get('agents')
+  // @UseGuards(JwtAuthGuard, RolesGuard)
+  // @Roles(Role.ADMIN)
+  async getAgentsByCity(@Query('city') city: string) {
+    return this.usersService.getAgentsByCity(city);
   }
 
   // Get a single user by ID
