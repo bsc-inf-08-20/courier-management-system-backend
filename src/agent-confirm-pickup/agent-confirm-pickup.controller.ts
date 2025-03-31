@@ -11,7 +11,7 @@ export class AgentConfirmPickupController {
     return await this.pickupsService.confirmPickup(data);
   }
 
-  @Get()
+  @Get('getPickups')
   async getAllPickups() {
     return await this.pickupsService.getAllPickups();
   }

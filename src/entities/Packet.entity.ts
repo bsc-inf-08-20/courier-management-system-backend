@@ -26,4 +26,4 @@ export class Packet {
 
   @OneToOne(() => PickupRequest, (pickup) => pickup.packet, { onDelete: 'CASCADE' })
   pickup: PickupRequest;
-}
+} 
