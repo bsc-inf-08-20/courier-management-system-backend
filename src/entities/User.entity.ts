@@ -5,8 +5,11 @@ import {
   Column,
   CreateDateColumn,
   OneToMany,
+  OneToOne,
 } from 'typeorm';
 import { PickupRequest } from './PickupRequest.entity';
+import { Profile } from './Profile.entity';
+import { Vehicle } from './Vehicle.entity';
 
 @Entity() // Marks this class as a database table
 export class User {
@@ -25,8 +28,14 @@ export class User {
   @Column({ length: 10 }) // A string column for phone numbers
   phone_number: string;
 
-  @Column('text') // A column for long text (e.g., address)
-  address: string;
+  // @Column('text') // A column for long text (e.g., address)
+  // address: string;
+
+  @Column({ length: 50 }) // New column to store the city
+  city: string;
+
+  @Column({ length: 50 }) // New column to store the city
+  area: string;
 
   @Column({
     type: 'enum',
@@ -38,8 +47,17 @@ export class User {
   @OneToMany(() => PickupRequest, (pickup) => pickup.customer)
   pickups: PickupRequest[];
 
-  @OneToMany(() => PickupRequest, (pickup) => pickup.assigned_agent, { cascade: true })
-  assignedPickups: PickupRequest[]; // ✅ If an agent is deleted, set pickups to NULL
+  @OneToMany(() => PickupRequest, (pickup) => pickup.assigned_agent, {
+    cascade: true,
+  })
+  assignedPickups: PickupRequest[]; // If an agent is deleted, set pickups to NULL
+
+  @OneToOne(() => Profile, (profile) => profile.user, { cascade: true })
+  profile: Profile;
+
+  // @OneToOne(() => Vehicle, (vehicle) => vehicle.assigned_driver)
+  // assignedVehicle: Vehicle;
+
 
   @CreateDateColumn() // Automatically stores when the record is created
   created_at: Date;

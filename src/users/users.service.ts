@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/entities/User.entity';
-import { Repository } from 'typeorm';
+import { Like, Repository } from 'typeorm';
 import { CreateUserDto } from '../dto/CreateUser.dto';
 import { encodePassword } from 'src/resources/bcrypt';
 import { UpdateUserDto } from 'src/dto/update-user.dto';
@@ -36,6 +36,19 @@ export class UsersService {
 
     return this.userRepository.save(newUser);
   };
+
+  async getAdminCity(userId: number) {
+    const admin = await this.userRepository.findOne({
+      where: { user_id: userId },
+      select: ['city'],
+    });
+
+    if (!admin) {
+      throw new NotFoundException('Admin not found');
+    }
+
+    return { city: admin.city };
+  }
 
   findAll(): Promise<User[]> {
     return this.userRepository.find();
@@ -70,7 +83,7 @@ export class UsersService {
     const user = await this.userRepository.findOne({ where: { user_id: id } });
 
     if (!user) {
-      throw new NotFoundException("User not found");
+      throw new NotFoundException('User not found');
     }
 
     Object.assign(user, updateDto); // ✅ Merge updates
@@ -81,15 +94,25 @@ export class UsersService {
     await this.userRepository.delete(id);
   }
 
-  
-// delete all users
+  // delete all users
   async deleteAllUsers(): Promise<void> {
-    await this.userRepository.delete({}); 
+    await this.userRepository.delete({});
   }
-
 
   // get by user by role
   async getUsersByRole(role: Role): Promise<User[]> {
     return this.userRepository.find({ where: { role } });
   }
+
+  //get agent by amdin's city
+  async getAgentsByCity(city: string): Promise<User[]> {
+    return this.userRepository.find({
+      where: {
+        role: Role.AGENT,
+        city: Like(`%${city}%`),
+      },
+      select: ['user_id', 'name', 'email', 'phone_number', 'city'],
+    });
+  }
+
 }
