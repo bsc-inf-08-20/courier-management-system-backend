@@ -15,6 +15,9 @@ import { PacketsModule } from './packets/packets.module';
 import { Profile } from './entities/Profile.entity';
 import { Vehicle } from './entities/Vehicle.entity';
 import { VehiclesModule } from './vehicles/vehicles.module';
+import { MessagesModule } from './message/message.module';
+import { MessagesGateway } from './message_gateway/message_gateway.gateway';
+import { Message } from './entities/message.entity';
 
 @Module({
   imports: [
@@ -26,7 +29,7 @@ import { VehiclesModule } from './vehicles/vehicles.module';
       password: '',
       database: 'courier_db',
       // entities: [__dirname + '/entities/*.ts'], // Path to your entity files
-      entities: [User, PickupRequest, Packet,AgentConfirmPickup,Profile, Vehicle],
+      entities: [User, PickupRequest, Packet,AgentConfirmPickup,Profile, Vehicle,Message],
       synchronize: true,
     }),
     UsersModule,
@@ -36,8 +39,9 @@ import { VehiclesModule } from './vehicles/vehicles.module';
     AgentConfirmPickupModule,
     PacketsModule,
     VehiclesModule,
+    MessagesModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, MessagesGateway],
 })
 export class AppModule {}
