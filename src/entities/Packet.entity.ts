@@ -34,30 +34,6 @@ export class Packet {
   })
   status: string;
 
-  @Column({ nullable: true })
-  collected_at: Date;
-
-  @Column({ nullable: true })
-  origin_hub_confirmed_at: Date;
-
-  @Column({ nullable: true })
-  dispatched_at: Date;
-
-  @Column({ nullable: true })
-  destination_hub_confirmed_at: Date;
-
-  @Column({ nullable: true })
-  out_for_delivery_at: Date;
-
-  @Column({ nullable: true })
-  delivered_at: Date;
-
-  @Column({ nullable: true })
-  received_at: Date;
-
-  @Column({ nullable: true })
-  hub_confirmed_at: Date;
-
   @Column('float')
   weight: number;
 
@@ -84,10 +60,30 @@ export class Packet {
   @JoinColumn()
   assigned_vehicle: Vehicle;
 
-  // Add fields to track dispatch timing
-  // @Column({ nullable: true })
-  // dispatched_at: Date;
-
   @Column({ default: false }) // ✅ Only allow Mzuzu to see confirmed packets
   confirmed_by_origin: boolean;
+
+  @Column({ nullable: true })
+  collected_at: Date;
+
+  @Column({ nullable: true })
+  origin_hub_confirmed_at: Date;
+
+  @Column({ nullable: true })
+  dispatched_at: Date;
+
+  @Column({ nullable: true })
+  destination_hub_confirmed_at: Date;
+
+  @Column({ nullable: true })
+  out_for_delivery_at: Date;
+
+  @Column({ nullable: true })
+  delivered_at: Date;
+
+  @Column({ nullable: true })
+  received_at: Date;
+
+  @Column({ nullable: true })
+  hub_confirmed_at: Date;
 }

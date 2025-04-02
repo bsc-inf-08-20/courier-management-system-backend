@@ -18,6 +18,7 @@ export class UsersService {
     private userRepository: Repository<User>,
   ) {}
 
+  // create a user
   createUser = async (userContent: CreateUserDto) => {
     // Check if user already exists
     const existingUser = await this.userRepository.findOneBy({
@@ -66,7 +67,18 @@ export class UsersService {
     return User;
   };
 
-  findUserByEmail = async (email: string): Promise<User> => {
+  async findOne(userId: number): Promise<User> {
+    const user = await this.userRepository.findOne({
+      where: { user_id: userId },
+    });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return user;
+  }
+
+
+  async findUserByEmail(email: string): Promise<User | null> {
     const User = await this.userRepository.findOneBy({
       email: email,
     });
@@ -76,7 +88,7 @@ export class UsersService {
     }
 
     return User;
-  };
+  }
 
   //update a user
   async updateUser(id: number, updateDto: UpdateUserDto): Promise<User> {
@@ -104,7 +116,7 @@ export class UsersService {
     return this.userRepository.find({ where: { role } });
   }
 
-  //get agent by amdin's city
+  //get agent by admin's city
   async getAgentsByCity(city: string): Promise<User[]> {
     return this.userRepository.find({
       where: {
@@ -113,5 +125,26 @@ export class UsersService {
       },
       select: ['user_id', 'name', 'email', 'phone_number', 'city'],
     });
+  }
+
+  // get driver by admin's city
+  async getDriversByCity(city: string): Promise<User[]> {
+    const drivers = await this.userRepository.find({
+      where: {
+        current_city: city,
+        role: Role.DRIVER,
+        is_active: true, // Only return active drivers
+      },
+      select: [
+        'user_id',
+        'name',
+        'email',
+        'phone_number',
+        'current_city',
+        'is_active',
+      ],
+    });
+
+    return drivers;
   }
 }

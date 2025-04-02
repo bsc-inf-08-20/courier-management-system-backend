@@ -30,6 +30,9 @@ export class Vehicle {
   @Column({ default: false })
   is_in_maintenance: boolean;
 
+  @Column()
+  current_city: string; 
+
   @ManyToOne(() => User, { nullable: true })
   @JoinColumn()
   assigned_driver?: User; // Nullable, links to driver
