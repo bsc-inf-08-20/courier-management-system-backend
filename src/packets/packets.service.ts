@@ -268,6 +268,7 @@ export class PacketsService {
         );
       }
       packet.status = 'in_transit';
+      packet.confirmed_by_origin = true;
       packet.assigned_driver = driver;
       packet.assigned_vehicle = vehicle;
       packet.dispatched_at = new Date();
