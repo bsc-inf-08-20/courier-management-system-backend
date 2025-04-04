@@ -9,6 +9,7 @@ import {
   Patch,
   Post,
   Query,
+  Req,
   Request,
   UseGuards,
 } from '@nestjs/common';
@@ -18,10 +19,24 @@ import { Roles } from 'src/decorators/roles.decorator';
 import { Role } from 'src/enum/role.enum';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { UpdatePacketWeightDto } from 'src/dto/update-packet-weight.dto';
+import { Packet } from 'src/entities/Packet.entity';
+import { CreatePacketDto } from 'src/dto/create-packet.dto';
 
 @Controller('packets')
 export class PacketsController {
   constructor(private readonly packetsService: PacketsService) {}
+
+  // Post a packet from admin's panel
+  @Post()
+  async createPacket(
+    @Body() createPacketDto: CreatePacketDto,
+    @Request() req,
+  ): Promise<Packet> {
+    const admin = req.user; // Assuming user is attached via JWT or auth middleware
+    return this.packetsService.createPacket(createPacketDto, admin);
+  }
+
+
 
   // GET all packets
   @Get()

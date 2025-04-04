@@ -24,6 +24,31 @@ export class PacketsService {
     private readonly vehicleRepository: Repository<Vehicle>,
   ) {}
 
+  //create packet from admin's panel
+  async createPacket(packetData: Partial<Packet>, admin: any): Promise<Packet> {
+    // Prepare the packet data with default values and validation
+    const packet = this.packetRepository.create({
+      description: packetData.description || '',
+      weight: packetData.weight || 0,
+      category: packetData.category || 'other',
+      instructions: packetData.instructions || '',
+      origin_address: packetData.origin_address || '',
+      origin_coordinates: packetData.origin_coordinates || { lat: 0, lng: 0 },
+      destination_address: packetData.destination_address || '',
+      destination_coordinates: packetData.destination_coordinates || { lat: 0, lng: 0 },
+      delivery_type: packetData.delivery_type || 'pickup',
+      destination_hub: packetData.destination_hub || '',
+      sender: packetData.sender || { name: '', email: '', phone_number: '' },
+      receiver: packetData.receiver || { name: '', email: '', phone_number: '' },
+      status: packetData.status || 'pending', // Default to 'pending', but can be overridden
+    });
+
+    // Save the packet to the database
+    const savedPacket = await this.packetRepository.save(packet);
+
+    return savedPacket;
+  }
+
   // Fetch all packets from DB
   async getAllPackets(): Promise<Packet[]> {
     return this.packetRepository.find();
@@ -45,18 +70,6 @@ export class PacketsService {
     return this.packetRepository.save(packet);
   }
 
-  // getPacketsForAdmin
-  // async getPacketsForAdmin(adminCity: string): Promise<Packet[]> {
-  //   return this.packetRepository.find({
-  //     where: [
-  //       { origin_address: Like(`%${adminCity}%`) }, // ✅ Admin sees packets from their city
-  //       {
-  //         destination_address: Like(`%${adminCity}%`),
-  //         confirmed_by_origin: true  // ✅ Only show incoming packets if confirmed
-  //       }
-  //     ],
-  //   });
-  // }
 
   // get packets based on the city of the admin (origin and destination<after confirmed>)
   async getPacketsForAdmin(adminId: number): Promise<Packet[]> {
@@ -81,36 +94,6 @@ export class PacketsService {
       relations: ['pickup', 'pickup.customer', 'pickup.assigned_agent'],
     });
   }
-
-  //comfim the collection
-  // async agentConfirmCollection(packetId: number, agentId: number, weight?: number): Promise<Packet> {
-  //   const packet = await this.packetRepository.findOne({
-  //     where: { id: packetId },
-  //     relations: ['pickup', 'pickup.assigned_agent'],
-  //   });
-
-  //   if (!packet) throw new NotFoundException('Packet not found');
-  //   if (!packet.pickup) throw new NotFoundException('Pickup request not found');
-  //   if (packet.pickup.assigned_agent?.user_id !== agentId) {
-  //     throw new ForbiddenException('You are not assigned to this pickup');
-  //   }
-
-  //   if (packet.status !== 'pending') {
-  //     throw new ForbiddenException('Packet is not in a state to be collected');
-  //   }
-
-  //   // Update weight if provided and valid
-  //   if (weight !== undefined) {
-  //     if (weight <= 0) {
-  //       throw new ForbiddenException('Weight must be greater than 0');
-  //     }
-  //     packet.weight = weight;
-  //   }
-
-  //   packet.status = 'collected';
-  //   packet.collected_at = new Date();
-  //   return this.packetRepository.save(packet);
-  // }
 
   async updateWeight(id: number, weight: number): Promise<Packet> {
     const packet = await this.packetRepository.findOneBy({ id });

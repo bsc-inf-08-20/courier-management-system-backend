@@ -109,7 +109,7 @@ export class PickupService {
     const [pickupRequest, agent, admin] = await Promise.all([
       this.pickupRepository.findOne({
         where: { id: requestId },
-        relations: ['packet', 'assigned_agent'],
+        relations: ['packet', 'assigned_agent'], // Ensure packet is loaded
       }),
       this.userRepository.findOne({
         where: { user_id: agentId },
@@ -118,26 +118,32 @@ export class PickupService {
         where: { user_id: adminId },
       }),
     ]);
-
+  
     if (!pickupRequest) throw new NotFoundException('Pickup request not found');
     if (!agent || agent.role !== Role.AGENT)
       throw new NotFoundException('Agent not found');
     if (!admin) throw new NotFoundException('Admin not found');
-
+  
     // Verify packet is from admin's city
     if (!pickupRequest.packet.origin_address.includes(admin.city)) {
       throw new ForbiddenException(
         'You can only assign agents to packets from your city',
       );
     }
-
+  
     // Verify agent is from the same city
     if (agent.city !== admin.city) {
       throw new ForbiddenException('You can only assign agents from your city');
     }
-
+  
+    // Assign agent to the PickupRequest
     pickupRequest.assigned_agent = agent;
     pickupRequest.status = 'assigned';
+  
+    // Assign agent to the Packet as assigned_driver
+    pickupRequest.packet.assigned_pickup_agent = agent;
+  
+    // Save the PickupRequest (this will cascade to the Packet due to eager: true and cascade: true)
     return this.pickupRepository.save(pickupRequest);
   }
 
