@@ -21,6 +21,7 @@ import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { UpdatePacketWeightDto } from 'src/dto/update-packet-weight.dto';
 import { Packet } from 'src/entities/Packet.entity';
 import { CreatePacketDto } from 'src/dto/create-packet.dto';
+import { Vehicle } from 'src/entities/Vehicle.entity';
 
 @Controller('packets')
 export class PacketsController {
@@ -211,5 +212,55 @@ export class PacketsController {
       body.driverId,
       body.vehicleId,
     );
+  }
+
+
+  // Dealing with disptching 
+
+  @UseGuards(JwtAuthGuard)
+  @Post('assign-to-vehicle')
+  async assignPacketToVehicle(
+    @Body('packetId') packetId: number,
+    @Body('vehicleId') vehicleId: number,
+    @Request() req,
+  ): Promise<Packet> {
+    return this.packetsService.assignPacketToVehicle(packetId, vehicleId, req.user);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('assign-multiple-to-vehicle')
+  async assignMultiplePacketsToVehicle(
+    @Body('packetIds') packetIds: number[],
+    @Body('vehicleId') vehicleId: number,
+    @Request() req,
+  ): Promise<Packet[]> {
+    return this.packetsService.assignMultiplePacketsToVehicle(packetIds, vehicleId, req.user);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('dispatch-vehicle/:vehicleId')
+  async dispatchVehicle(
+    @Param('vehicleId') vehicleId: number,
+    @Request() req,
+  ): Promise<Vehicle> {
+    return this.packetsService.dispatchVehicle(vehicleId, req.user);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('available-vehicles')
+  async getAvailableVehicles(
+    @Query('city') city: string,
+    @Request() req,
+  ): Promise<Vehicle[]> {
+    return this.packetsService.getAvailableVehicles(city);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('unassign-from-vehicle')
+  async unassignPacketFromVehicle(
+    @Body('packetId') packetId: number,
+    @Request() req,
+  ): Promise<Packet> {
+    return this.packetsService.unassignPacketFromVehicle(packetId, req.user);
   }
 }

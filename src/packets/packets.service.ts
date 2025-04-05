@@ -262,24 +262,24 @@ export class PacketsService {
     return this.packetRepository.save(packets);
   }
 
-  async getPacketsAtOriginHub(city: string) {
-    return this.packetRepository.find({
-      where: {
-        status: 'at_origin_hub',
-        origin_address: Like(`%${city}%`),
-        // confirmed_by_origin: true, // Only show confirmed packets
-      },
-      relations: [
-        'pickup',
-        'pickup.customer',
-        'assigned_driver',
-        'assigned_vehicle',
-      ],
-      order: {
-        origin_hub_confirmed_at: 'DESC', // Show most recently confirmed first
-      },
-    });
-  }
+  // async getPacketsAtOriginHub(city: string) {
+  //   return this.packetRepository.find({
+  //     where: {
+  //       status: 'at_origin_hub',
+  //       origin_address: Like(`%${city}%`),
+  //       // confirmed_by_origin: true, // Only show confirmed packets
+  //     },
+  //     relations: [
+  //       'pickup',
+  //       'pickup.customer',
+  //       'assigned_driver',
+  //       'assigned_vehicle',
+  //     ],
+  //     order: {
+  //       origin_hub_confirmed_at: 'DESC', // Show most recently confirmed first
+  //     },
+  //   });
+  // }
 
   async getPacketsInTransitFromOrigin(origin: string) {
     return this.packetRepository.find({
@@ -315,5 +315,196 @@ export class PacketsService {
         dispatched_at: 'DESC',
       },
     });
+  }
+
+  //Dealing with dispatching 
+
+  async assignPacketToVehicle(packetId: number, vehicleId: number, admin: User): Promise<Packet> {
+    if (admin.role !== Role.ADMIN) {
+      throw new ForbiddenException('Only admins can assign packets');
+    }
+
+    const packet = await this.packetRepository.findOne({
+      where: { id: packetId, status: 'at_origin_hub' },
+    });
+    if (!packet) throw new NotFoundException('Packet not found or not ready for assignment');
+
+    const vehicle = await this.vehicleRepository.findOne({
+      where: { id: vehicleId, is_active: true, is_in_maintenance: false },
+      relations: ['assigned_packets'],
+    });
+    if (!vehicle) throw new NotFoundException('Vehicle not found or unavailable');
+
+    // Extract destination city from packet's destination_address (assuming format includes city)
+    const packetDestinationCity = packet.destination_address.split(',').pop()?.trim();
+    if (vehicle.destination_city && vehicle.destination_city !== packetDestinationCity) {
+      throw new BadRequestException(
+        `Vehicle is assigned to ${vehicle.destination_city}, but packet is going to ${packetDestinationCity}`,
+      );
+    }
+
+    const newLoad = vehicle.current_load + packet.weight;
+    if (newLoad > vehicle.capacity) {
+      throw new BadRequestException(
+        `Adding packet (${packet.weight}kg) exceeds vehicle capacity. Current: ${vehicle.current_load}kg, Capacity: ${vehicle.capacity}kg`,
+      );
+    }
+
+    // Set destination city if not set
+    if (!vehicle.destination_city) {
+      vehicle.destination_city = packetDestinationCity;
+    }
+
+    packet.assigned_vehicle = vehicle;
+    vehicle.current_load = newLoad;
+
+    await this.vehicleRepository.save(vehicle);
+    return this.packetRepository.save(packet);
+  }
+
+  async assignMultiplePacketsToVehicle(packetIds: number[], vehicleId: number, admin: User): Promise<Packet[]> {
+    if (admin.role !== Role.ADMIN) {
+      throw new ForbiddenException('Only admins can assign packets');
+    }
+
+    const packets = await this.packetRepository.find({
+      where: { id: In(packetIds), status: 'at_origin_hub' },
+    });
+    if (packets.length !== packetIds.length) {
+      throw new NotFoundException('One or more packets not found or not ready for assignment');
+    }
+
+    const vehicle = await this.vehicleRepository.findOne({
+      where: { id: vehicleId, is_active: true, is_in_maintenance: false },
+      relations: ['assigned_packets'],
+    });
+    if (!vehicle) throw new NotFoundException('Vehicle not found or unavailable');
+
+    const packetDestinationCities = packets.map((p) => p.destination_address.split(',').pop()?.trim());
+    const uniqueDestinations = [...new Set(packetDestinationCities)];
+    if (uniqueDestinations.length > 1) {
+      throw new BadRequestException('All packets must have the same destination city');
+    }
+
+    const packetDestinationCity = uniqueDestinations[0];
+    if (vehicle.destination_city && vehicle.destination_city !== packetDestinationCity) {
+      throw new BadRequestException(
+        `Vehicle is assigned to ${vehicle.destination_city}, but packets are going to ${packetDestinationCity}`,
+      );
+    }
+
+    const totalWeight = packets.reduce((sum, p) => sum + p.weight, 0);
+    const newLoad = vehicle.current_load + totalWeight;
+    if (newLoad > vehicle.capacity) {
+      throw new BadRequestException(
+        `Adding packets (${totalWeight}kg) exceeds vehicle capacity. Current: ${vehicle.current_load}kg, Capacity: ${vehicle.capacity}kg`,
+      );
+    }
+
+    if (!vehicle.destination_city) {
+      vehicle.destination_city = packetDestinationCity;
+    }
+
+    vehicle.current_load = newLoad;
+    packets.forEach((packet) => {
+      packet.assigned_vehicle = vehicle;
+    });
+
+    await this.vehicleRepository.save(vehicle);
+    return this.packetRepository.save(packets);
+  }
+
+  async getAvailableVehicles(city: string): Promise<Vehicle[]> {
+    return this.vehicleRepository.find({
+      where: {
+        current_city: city,
+        is_active: true,
+        is_in_maintenance: false,
+        status: 'available', // Only return available vehicles
+      },
+      relations: ['assigned_packets'],
+    });
+  }
+
+  async dispatchVehicle(vehicleId: number, admin: User): Promise<Vehicle> {
+    if (admin.role !== Role.ADMIN) {
+      throw new ForbiddenException('Only admins can dispatch vehicles');
+    }
+
+    const vehicle = await this.vehicleRepository.findOne({
+      where: { id: vehicleId, is_active: true, is_in_maintenance: false },
+      relations: ['assigned_packets'],
+    });
+    if (!vehicle) throw new NotFoundException('Vehicle not found or unavailable');
+    if (!vehicle.assigned_packets || vehicle.assigned_packets.length === 0) {
+      throw new BadRequestException('Vehicle has no assigned packets to dispatch');
+    }
+
+    vehicle.assigned_packets.forEach((packet) => {
+      packet.status = 'in_transit';
+      packet.dispatched_at = new Date();
+      packet.confirmed_by_origin = true;
+    });
+
+    vehicle.status = 'in_transit'; // Set vehicle status to in_transit
+
+    await this.packetRepository.save(vehicle.assigned_packets);
+    await this.vehicleRepository.save(vehicle);
+    return vehicle;
+  }
+
+  // Update existing method to include assigned_vehicle relation
+  async getPacketsAtOriginHub(city: string) {
+    return this.packetRepository.find({
+      where: {
+        status: 'at_origin_hub',
+        origin_address: Like(`%${city}%`),
+      },
+      relations: [
+        'pickup',
+        'pickup.customer',
+        'assigned_vehicle',
+      ],
+      order: {
+        origin_hub_confirmed_at: 'DESC',
+      },
+    });
+  }
+
+  async unassignPacketFromVehicle(packetId: number, admin: User): Promise<Packet> {
+    if (admin.role !== Role.ADMIN) {
+      throw new ForbiddenException('Only admins can unassign packets');
+    }
+
+    const packet = await this.packetRepository.findOne({
+      where: { id: packetId, status: 'at_origin_hub' },
+      relations: ['assigned_vehicle'],
+    });
+    if (!packet) throw new NotFoundException('Packet not found or not in a state to unassign');
+
+    if (!packet.assigned_vehicle) {
+      throw new BadRequestException('Packet is not assigned to any vehicle');
+    }
+
+    const vehicle = await this.vehicleRepository.findOne({
+      where: { id: packet.assigned_vehicle.id },
+      relations: ['assigned_packets'],
+    });
+    if (!vehicle) throw new NotFoundException('Assigned vehicle not found');
+
+    // Update vehicle's current load
+    vehicle.current_load -= packet.weight;
+
+    // If no packets remain, clear the destination city
+    const remainingPackets = vehicle.assigned_packets.filter((p) => p.id !== packetId);
+    if (remainingPackets.length === 0) {
+      vehicle.destination_city = null;
+    }
+
+    // Unassign the packet
+    packet.assigned_vehicle = null;
+
+    await this.vehicleRepository.save(vehicle);
+    return this.packetRepository.save(packet);
   }
 }

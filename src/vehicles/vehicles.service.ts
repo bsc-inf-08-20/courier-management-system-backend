@@ -1,13 +1,17 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Vehicle } from 'src/entities/Vehicle.entity';
+import { User } from 'src/entities/User.entity';
+import { Role } from 'src/enum/role.enum';
 
 @Injectable()
 export class VehiclesService {
   constructor(
     @InjectRepository(Vehicle)
     private readonly vehicleRepository: Repository<Vehicle>,
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
   ) {}
 
 
@@ -31,6 +35,66 @@ export class VehiclesService {
   async getVehiclesByCity(current_city: string): Promise<Vehicle[]> {
     // console.log('Service received city:', current_city);
     return await this.vehicleRepository.find({ where: { current_city } });
+  }
+
+  async assignVehicleToDriver(
+    vehicleId: number,
+    driverId: number,
+    requestingUser: User,
+  ): Promise<Vehicle> {
+    // Check if requesting user is admin
+    if (requestingUser.role !== Role.ADMIN) {
+      throw new ForbiddenException('Only admins can assign vehicles');
+    }
+
+    // Find vehicle
+    const vehicle = await this.vehicleRepository.findOne({
+      where: { id: vehicleId },
+      relations: ['assigned_driver'],
+    });
+    if (!vehicle) {
+      throw new NotFoundException('Vehicle not found');
+    }
+
+    // Find driver
+    const driver = await this.userRepository.findOne({
+      where: { user_id: driverId, role: Role.DRIVER },
+      relations: ['assignedVehicle'],
+    });
+    if (!driver) {
+      throw new NotFoundException('Driver not found');
+    }
+
+    // If vehicle is already assigned to another driver, remove that assignment
+    if (vehicle.assigned_driver && vehicle.assigned_driver.user_id !== driverId) {
+      const previousDriver = await this.userRepository.findOne({
+        where: { user_id: vehicle.assigned_driver.user_id },
+      });
+      if (previousDriver) {
+        previousDriver.assignedVehicle = null;
+        await this.userRepository.save(previousDriver);
+      }
+    }
+
+    // If driver already has a vehicle, remove that assignment
+    if (driver.assignedVehicle && driver.assignedVehicle.id !== vehicleId) {
+      const previousVehicle = await this.vehicleRepository.findOne({
+        where: { id: driver.assignedVehicle.id },
+      });
+      if (previousVehicle) {
+        previousVehicle.assigned_driver = null;
+        await this.vehicleRepository.save(previousVehicle);
+      }
+    }
+
+    // Assign vehicle to driver
+    vehicle.assigned_driver = driver;
+    driver.assignedVehicle = vehicle;
+
+    await this.vehicleRepository.save(vehicle);
+    await this.userRepository.save(driver);
+
+    return vehicle;
   }
 }
 

@@ -59,8 +59,9 @@ export class User {
   @OneToMany(() => RefreshToken, (refreshToken) => refreshToken.user)
   refreshTokens: RefreshToken[];
 
-  // @OneToOne(() => Vehicle, (vehicle) => vehicle.assigned_driver)
-  // assignedVehicle: Vehicle;
+  @OneToOne(() => Vehicle, (vehicle) => vehicle.assigned_driver, { nullable: true })
+  assignedVehicle: Vehicle | null;
+
   @Column()
   current_city: string;
 

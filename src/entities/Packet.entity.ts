@@ -89,9 +89,8 @@ export class Packet {
   @JoinColumn()
   assigned_driver: User;
 
-  @ManyToOne(() => Vehicle, { nullable: true })
-  @JoinColumn()
-  assigned_vehicle: Vehicle;
+  @ManyToOne(() => Vehicle, (vehicle) => vehicle.assigned_packets, { nullable: true })
+  assigned_vehicle?: Vehicle | null;
 
   @Column({ default: false }) // Only allow Mzuzu to see confirmed packets
   confirmed_by_origin: boolean;

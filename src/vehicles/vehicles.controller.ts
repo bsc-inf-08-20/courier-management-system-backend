@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Body, Param, UseGuards, Query, NotFoundException,Request } from '@nestjs/common';
+import { Controller, Post, Get, Body, Param, UseGuards, Query, NotFoundException,Request, Put } from '@nestjs/common';
 import { VehiclesService } from './vehicles.service';
 import { Vehicle } from 'src/entities/Vehicle.entity';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
@@ -40,6 +40,16 @@ export class VehiclesController {
     }
 
     return vehicles;
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Put(':vehicleId/assign-driver')
+  async assignDriver(
+    @Param('vehicleId') vehicleId: number,
+    @Body('driverId') driverId: number,
+    @Request() req,
+  ): Promise<Vehicle> {
+    return this.vehiclesService.assignVehicleToDriver(vehicleId, driverId, req.user);
   }
 }
 
