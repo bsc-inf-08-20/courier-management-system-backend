@@ -5,6 +5,7 @@ import { Packet } from 'src/entities/Packet.entity';
 import { User } from 'src/entities/User.entity';
 import { Vehicle } from 'src/entities/Vehicle.entity';
 import { Role } from 'src/enum/role.enum';
+import { sendMail } from 'src/utils/mail';
 
 @Injectable()
 export class PacketsService {
@@ -53,7 +54,7 @@ export class PacketsService {
   async getPacketsForAdmin(adminId: number): Promise<Packet[]> {
     const admin = await this.userRepository.findOne({ 
       where: { user_id: adminId },
-      select: ['city']
+      select: ['city', 'email'] //Select the city and email of the admin
     });
 
     if (!admin) throw new NotFoundException('Admin not found');
@@ -260,6 +261,26 @@ export class PacketsService {
       packet.assigned_driver = driver;
       packet.assigned_vehicle = vehicle;
       packet.dispatched_at = new Date();
+
+      // Sending an email to the assigned agent about the packet dispatch
+      if (packet.pickup?.assigned_agent) {
+        const agent = packet.pickup.assigned_agent;
+        const admin = await this.userRepository.findOne({ where: { user_id: driverId } }); // Get admin's details
+
+        if (admin && agent.email) {
+          await sendMail({
+            to: agent.email,
+            name: agent.name,
+            subject: 'Packet Assigned',
+            body: `
+              <p>Hello ${agent.name},</p>
+              <p>You have been assigned a packet for pickup. Details:</p>
+              <p>Packet ID: ${packet.id}</p>
+              <p>Assigned by: ${admin.name}</p>
+            `
+          });
+        }
+      }
     }
 
     vehicle.assigned_driver = driver;

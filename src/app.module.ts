@@ -40,6 +40,7 @@ import { Message } from './entities/message.entity';
     PacketsModule,
     VehiclesModule,
     MessagesModule,
+  
   ],
   controllers: [AppController],
   providers: [AppService, MessagesGateway],
