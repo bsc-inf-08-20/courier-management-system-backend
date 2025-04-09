@@ -6,6 +6,8 @@ import {
   CreateDateColumn,
   OneToMany,
   OneToOne,
+  ManyToOne,
+  JoinColumn,
 } from 'typeorm';
 import { PickupRequest } from './PickupRequest.entity';
 import { Profile } from './Profile.entity';

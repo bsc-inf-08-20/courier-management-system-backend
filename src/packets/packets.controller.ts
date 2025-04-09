@@ -263,4 +263,46 @@ export class PacketsController {
   ): Promise<Packet> {
     return this.packetsService.unassignPacketFromVehicle(packetId, req.user);
   }
+
+
+  // DEALING WITH DELIVERY
+  @UseGuards(JwtAuthGuard)
+  @Get('at-destination-hub')
+  async getPacketsAtDestinationHub(@Query('city') city: string): Promise<Packet[]> {
+    return this.packetsService.getPacketsAtDestinationHub(city);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('out-for-delivery')
+  async getPacketsOutForDelivery(@Query('city') city: string): Promise<Packet[]> {
+    return this.packetsService.getPacketsOutForDelivery(city);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('assign-delivery-agent')
+  async assignDeliveryAgent(
+    @Body('packetId') packetId: number,
+    @Body('agentId') agentId: number,
+    @Request() req,
+  ): Promise<Packet> {
+    return this.packetsService.assignDeliveryAgent(packetId, agentId, req.user);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('unassign-delivery-agent')
+  async unassignDeliveryAgent(
+    @Body('packetId') packetId: number,
+    @Request() req,
+  ): Promise<Packet> {
+    return this.packetsService.unassignDeliveryAgent(packetId, req.user);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('confirm-delivery')
+  async confirmDelivery(
+    @Body('packetId') packetId: number,
+    @Request() req,
+  ): Promise<Packet> {
+    return this.packetsService.confirmDelivery(packetId, req.user);
+  }
 }

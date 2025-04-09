@@ -507,4 +507,101 @@ export class PacketsService {
     await this.vehicleRepository.save(vehicle);
     return this.packetRepository.save(packet);
   }
+
+
+
+
+  //HANDLING RECEIVING PACKET 
+  // Fetch packets at the destination hub (ready for delivery agent assignment)
+  async getPacketsAtDestinationHub(city: string): Promise<Packet[]> {
+    return this.packetRepository.find({
+      where: {
+        status: 'at_destination_hub',
+        destination_address: Like(`%${city}%`),
+      },
+      relations: ['assigned_delivery_agent'],
+    });
+  }
+
+  // Fetch packets out for delivery (already assigned to a delivery agent)
+  async getPacketsOutForDelivery(city: string): Promise<Packet[]> {
+    return this.packetRepository.find({
+      where: {
+        status: 'out_for_delivery',
+        destination_address: Like(`%${city}%`),
+        assigned_delivery_agent: { city },
+      },
+      relations: ['assigned_delivery_agent'],
+    });
+  }
+
+  // Assign a delivery agent to a packet
+  async assignDeliveryAgent(packetId: number, agentId: number, admin: User): Promise<Packet> {
+    if (admin.role !== Role.ADMIN) {
+      throw new ForbiddenException('Only admins can assign delivery agents');
+    }
+
+    const packet = await this.packetRepository.findOne({
+      where: { id: packetId, status: 'at_destination_hub' },
+      relations: ['assigned_delivery_agent'],
+    });
+    if (!packet) {
+      throw new NotFoundException('Packet not found or not ready for delivery');
+    }
+
+    const agent = await this.userRepository.findOne({
+      where: { user_id: agentId, role: Role.AGENT },
+    });
+    if (!agent) {
+      throw new NotFoundException('Agent not found');
+    }
+
+    packet.assigned_delivery_agent = agent;
+    packet.status = 'out_for_delivery';
+    packet.out_for_delivery_at = new Date();
+
+    return this.packetRepository.save(packet);
+  }
+
+  // Unassign a delivery agent from a packet
+  async unassignDeliveryAgent(packetId: number, admin: User): Promise<Packet> {
+    if (admin.role !== Role.ADMIN) {
+      throw new ForbiddenException('Only admins can unassign delivery agents');
+    }
+
+    const packet = await this.packetRepository.findOne({
+      where: { id: packetId, status: 'out_for_delivery' },
+      relations: ['assigned_delivery_agent'],
+    });
+    if (!packet) {
+      throw new NotFoundException('Packet not found or not out for delivery');
+    }
+
+    packet.assigned_delivery_agent = null;
+    packet.status = 'at_destination_hub';
+    // packet.out_for_delivery_at = null;
+
+    return this.packetRepository.save(packet);
+  }
+
+  // Confirm delivery of a packet
+  async confirmDelivery(packetId: number, admin: User): Promise<Packet> {
+    if (admin.role !== Role.ADMIN) {
+      throw new ForbiddenException('Only admins can confirm delivery');
+    }
+
+    const packet = await this.packetRepository.findOne({
+      where: { id: packetId, status: 'out_for_delivery' },
+      relations: ['assigned_delivery_agent'],
+    });
+    if (!packet) {
+      throw new NotFoundException('Packet not found or not out for delivery');
+    }
+
+    packet.status = 'delivered';
+    packet.delivered_at = new Date();
+    packet.assigned_delivery_agent = null; // Clear the assigned agent after delivery
+
+    return this.packetRepository.save(packet);
+  }
 }
