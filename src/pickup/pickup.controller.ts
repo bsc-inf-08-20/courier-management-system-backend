@@ -10,6 +10,8 @@ import {
   ParseIntPipe,
   NotFoundException,
   Query,
+  ForbiddenException,
+  BadRequestException,
 } from '@nestjs/common';
 import { PickupService } from './pickup.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
@@ -42,27 +44,6 @@ export class PickupController {
     return this.pickupService.requestPickup(req.user.user_id, pickupData);
   }
 
-  // Admin assigns an agent based on location
-  //
-  // @Post('assign/:pickupId')
-  // async assignAgent(@Param('pickupId') pickupId: number) {
-  //   return this.pickupService.assignAgent(pickupId);
-  // }
-
-  // Only admin can assign agents
-  // @UseGuards(JwtAuthGuard, RolesGuard)
-  // @Roles(Role.ADMIN)
-  // @Patch(':id/assign')
-  // async assignAgent(
-  //   @Param('id') requestId: number,
-  //   @Body() assignAgentDto: AssignAgentDto,
-  // ) {
-  //   return this.pickupService.assignAgent(
-  //     requestId,
-  //     assignAgentDto.assignedAgentUserId,
-  //   );
-  // }
-
   @Patch(':id/assign')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
@@ -85,7 +66,6 @@ export class PickupController {
   async getAssignedPickups(@Request() req) {
     return this.pickupService.getAgentPickups(req.user.userId);
   }
-
 
   // get pickup request by admin's city
   @Get('requests')
@@ -112,6 +92,30 @@ export class PickupController {
     @Request() req,
   ) {
     return this.pickupService.getPacketsByPickup(pickupId, req.user.userId);
+  }
+
+  //get specific requests for specific agent
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.AGENT)
+  @Get('requests/agent')
+  async getRequests(
+    @Query('status') status: string,
+    @Query('agentId') agentId: string,
+    @Request() req,
+  ) {
+    console.log('User making request:', req.user); // Debug log
+    console.log('Received query params:', { status, agentId });
+
+    const parsedAgentId = parseInt(agentId);
+    if (status === 'assigned' && agentId) {
+      if (parsedAgentId !== req.user.user_id) {
+        throw new ForbiddenException(
+          'You can only view your own assigned requests',
+        );
+      }
+      return this.pickupService.getAssignedRequestsForAgent(parsedAgentId);
+    }
+    throw new BadRequestException('Invalid query parameters');
   }
 
   // get all the pickup request

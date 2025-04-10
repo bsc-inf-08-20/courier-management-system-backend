@@ -34,6 +34,73 @@ export class Packet {
   })
   status: string;
 
+  @Column('float')
+  weight: number;
+
+  @Column()
+  category: string; //"electronics", "documents", "clothing", etc.
+
+  @Column()
+  instructions: string;
+
+  @Column('json', { nullable: true })
+  sender: {
+    name: string;
+    email: string;
+    phone_number: string;
+  }; // Sender details
+
+  @Column('json', { nullable: true })
+  receiver: {
+    name: string;
+    email: string;
+    phone_number: string;
+  };
+
+  @Column({ type: 'varchar', length: 50, nullable: false })
+  delivery_type: 'pickup' | 'delivery';
+
+  @Column()
+  origin_address: string;
+
+  @Column('json', { nullable: true })
+  origin_coordinates: { lat: number; lng: number };
+
+  @Column()
+  destination_address: string;
+
+  @Column('json', { nullable: true })
+  destination_coordinates: { lat: number; lng: number };
+
+  @Column({ type: 'varchar', length: 50, nullable: true })
+  destination_hub: string; // Destination hub name (for pickup)
+
+  @OneToOne(() => PickupRequest, (pickup) => pickup.packet, {
+    onDelete: 'CASCADE',
+  })
+  pickup: PickupRequest;
+
+  @ManyToOne(() => User, { nullable: true })
+  @JoinColumn()
+  assigned_pickup_agent: User;
+
+  // Add to your Packet entity
+  @ManyToOne(() => User, { nullable: true })
+  @JoinColumn()
+  assigned_driver: User;
+
+  @ManyToOne(() => Vehicle, (vehicle) => vehicle.assigned_packets, {
+    nullable: true,
+  })
+  assigned_vehicle?: Vehicle | null;
+
+  @ManyToOne(() => User, { nullable: true })
+  @JoinColumn()
+  assigned_delivery_agent: User | null;
+
+  @Column({ default: false }) // Only allow Mzuzu to see confirmed packets
+  confirmed_by_origin: boolean;
+
   @Column({ nullable: true })
   collected_at: Date;
 
@@ -57,37 +124,4 @@ export class Packet {
 
   @Column({ nullable: true })
   hub_confirmed_at: Date;
-
-  @Column('float')
-  weight: number;
-
-  @Column()
-  category: string; //"electronics", "documents", "clothing", etc.
-
-  @Column()
-  origin_address: string;
-
-  @Column()
-  destination_address: string;
-
-  @OneToOne(() => PickupRequest, (pickup) => pickup.packet, {
-    onDelete: 'CASCADE',
-  })
-  pickup: PickupRequest;
-
-  // Add to your Packet entity
-  @ManyToOne(() => User, { nullable: true })
-  @JoinColumn()
-  assigned_driver: User;
-
-  @ManyToOne(() => Vehicle, { nullable: true })
-  @JoinColumn()
-  assigned_vehicle: Vehicle;
-
-  // Add fields to track dispatch timing
-  // @Column({ nullable: true })
-  // dispatched_at: Date;
-
-  @Column({ default: false }) // ✅ Only allow Mzuzu to see confirmed packets
-  confirmed_by_origin: boolean;
 }

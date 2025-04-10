@@ -1,14 +1,21 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
-import { comparePasswords } from 'src/resources/bcrypt';
 import { JwtService } from '@nestjs/jwt';
-import { CurrentUser } from './types/current-user';
+import * as bcrypt from 'bcrypt';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { RefreshToken } from 'src/entities/RefreshToken.entity';
+import { User } from 'src/entities/User.entity';
+import { Role } from '../enum/role.enum';
+import { comparePasswords } from 'src/resources/bcrypt';
 
 @Injectable()
 export class AuthService {
   constructor(
     private usersService: UsersService,
     private jwtService: JwtService,
+    @InjectRepository(RefreshToken)
+    private refreshTokenRepository: Repository<RefreshToken>,
   ) {}
 
   async validateUser(email: string, password: string): Promise<any> {
@@ -29,30 +36,97 @@ export class AuthService {
     return result;
   }
 
-  async login(user: any) {
-    // Create the JWT payload with user details and roles
-    const payload = {
-      email: user.email,
-      sub: user.user_id,
-      role: user.role, // Include roles in the payload
-    };
+  async validateJwtUser(email: string): Promise<User> {
+    const user = await this.usersService.findUserByEmail(email);
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+    return user;
+  }
 
-    // Return the access token
+  async login(user: any) {
+    const payload = { email: user.email, role: user.role, name: user.name };
+    const accessToken = this.jwtService.sign(payload, { expiresIn: '30m' });
+    const refreshToken = await this.generateRefreshToken(user);
+
     return {
-      access_token: this.jwtService.sign(payload),
+      access_token: accessToken,
+      refresh_token: refreshToken.token,
     };
   }
 
-  async validateJwtUser(email: string) {
-    const user = await this.usersService.findUserByEmail(email);
+  async generateRefreshToken(user: User): Promise<RefreshToken> {
+    const token = this.jwtService.sign(
+      { email: user.email, role: user.role },
+      {
+        secret: process.env.JWT_REFRESH_SECRET || 'refresh-secret',
+        expiresIn: '7d',
+      },
+    );
 
-    if (!user) throw new UnauthorizedException('User not found!');
-    const currentUser: CurrentUser = {
-      user_id: user.user_id,
-      email: user.email,
-      role: user.role,
-    };
+    const expiryDate = new Date();
+    expiryDate.setDate(expiryDate.getDate() + 7); // 7 days expiry
 
-    return currentUser;
+    const refreshToken = this.refreshTokenRepository.create({
+      token,
+      user,
+      expiryDate,
+      isRevoked: false,
+    });
+
+    return this.refreshTokenRepository.save(refreshToken);
+  }
+
+  async refreshToken(
+    refreshToken: string,
+  ): Promise<{ access_token: string; refresh_token: string }> {
+    try {
+      const payload = this.jwtService.verify(refreshToken, {
+        secret: process.env.JWT_REFRESH_SECRET || 'refresh-secret',
+      });
+
+      const storedToken = await this.refreshTokenRepository.findOne({
+        where: { token: refreshToken },
+        relations: ['user'],
+      });
+
+      if (!storedToken) {
+        throw new UnauthorizedException('Refresh token not found');
+      }
+      if (storedToken.isRevoked) {
+        throw new UnauthorizedException('Refresh token has been revoked');
+      }
+      if (storedToken.expiryDate < new Date()) {
+        throw new UnauthorizedException('Refresh token has expired');
+      }
+
+      const newAccessToken = this.jwtService.sign(
+        {
+          email: payload.email,
+          role: payload.role,
+          name: storedToken.user.name,
+        },
+        { expiresIn: '30m' },
+      );
+
+      await this.refreshTokenRepository.update(storedToken.id, {
+        isRevoked: true,
+      });
+      const newRefreshToken = await this.generateRefreshToken(storedToken.user);
+
+      return {
+        access_token: newAccessToken,
+        refresh_token: newRefreshToken.token,
+      };
+    } catch (error) {
+      if (error instanceof UnauthorizedException) {
+        throw error; // Re-throw specific errors
+      }
+      throw new UnauthorizedException('Invalid refresh token');
+    }
+  }
+
+  async revokeRefreshToken(token: string): Promise<void> {
+    await this.refreshTokenRepository.update({ token }, { isRevoked: true });
   }
 }

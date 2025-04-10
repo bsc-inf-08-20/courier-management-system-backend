@@ -1,5 +1,12 @@
-import { Controller, Get, Request, Post, UseGuards } from '@nestjs/common';
-import { JwtAuthGuard } from './auth/guards/jwt-auth.guard'; 
+import {
+  Controller,
+  Get,
+  Request,
+  Post,
+  UseGuards,
+  Body,
+} from '@nestjs/common';
+import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { LocalAuthGuard } from './auth/guards/local-auth.guard';
 import { AuthService } from './auth/auth.service';
 import { Roles } from './decorators/roles.decorator';
@@ -16,6 +23,14 @@ export class AppController {
     return this.authService.login(req.user);
   }
 
+  @Post('auth/refresh')
+  async refresh(@Body('refresh_token') refreshToken: string) {
+    if (!refreshToken) {
+      throw new Error('Refresh token is required');
+    }
+    return this.authService.refreshToken(refreshToken);
+  }
+
 
   @Roles(Role.USER)
   @UseGuards(RolesGuard)
@@ -25,4 +40,3 @@ export class AppController {
     return req.user;
   }
 }
-

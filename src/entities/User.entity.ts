@@ -6,10 +6,13 @@ import {
   CreateDateColumn,
   OneToMany,
   OneToOne,
+  ManyToOne,
+  JoinColumn,
 } from 'typeorm';
 import { PickupRequest } from './PickupRequest.entity';
 import { Profile } from './Profile.entity';
 import { Vehicle } from './Vehicle.entity';
+import { RefreshToken } from './RefreshToken.entity';
 
 @Entity() // Marks this class as a database table
 export class User {
@@ -55,9 +58,17 @@ export class User {
   @OneToOne(() => Profile, (profile) => profile.user, { cascade: true })
   profile: Profile;
 
-  // @OneToOne(() => Vehicle, (vehicle) => vehicle.assigned_driver)
-  // assignedVehicle: Vehicle;
+  @OneToMany(() => RefreshToken, (refreshToken) => refreshToken.user)
+  refreshTokens: RefreshToken[];
 
+  @OneToOne(() => Vehicle, (vehicle) => vehicle.assigned_driver, { nullable: true })
+  assignedVehicle: Vehicle | null;
+
+  @Column()
+  current_city: string;
+
+  @Column({ default: false })
+  is_active: boolean;
 
   @CreateDateColumn() // Automatically stores when the record is created
   created_at: Date;
