@@ -27,5 +27,5 @@ export class PickupRequest {
   packet: Packet;
 
   @CreateDateColumn()
-  created_at: Date;
+  created_at: Date; 
 }
