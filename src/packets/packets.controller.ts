@@ -33,8 +33,8 @@ export class PacketsController {
     @Body() createPacketDto: CreatePacketDto,
     @Request() req,
   ): Promise<Packet> {
-    const admin = req.user; // Assuming user is attached via JWT or auth middleware
-    return this.packetsService.createPacket(createPacketDto, admin);
+    // const admin = req.user; // Assuming user is attached via JWT or auth middleware
+    return this.packetsService.createPacket(createPacketDto);
   }
 
 
