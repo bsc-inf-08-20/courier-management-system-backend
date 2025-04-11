@@ -12,7 +12,7 @@ import { PacketsModule } from './packets/packets.module';
 import { Profile } from './entities/Profile.entity';
 import { Vehicle } from './entities/Vehicle.entity';
 import { VehiclesModule } from './vehicles/vehicles.module';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { RefreshToken } from './entities/RefreshToken.entity';
 
 @Module({
@@ -20,17 +20,31 @@ import { RefreshToken } from './entities/RefreshToken.entity';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-    TypeOrmModule.forRoot({
-      type: 'mysql',
-      host: 'localhost',
-      port: 3306,
-      username: 'root',
-      password: '',
-      database: 'courier_db',
-      // entities: [__dirname + '/entities/*.ts'], // Path to your entity files
-      entities: [User, PickupRequest, Packet, Profile, Vehicle, RefreshToken],
-      synchronize: true,
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        type: 'mysql',
+        host: 'localhost',
+        port: config.get<number>('DB_PORT'),
+        username: config.get<string>('DB_USERNAME'),
+        password: config.get<string>('DB_PASSWORD'),
+        database: config.get<string>('DB_NAME'),
+        synchronize: true,
+        entities: [User, PickupRequest, Packet, Profile, Vehicle, RefreshToken],
+      }),
     }),
+    // TypeOrmModule.forRoot({
+    //   type: 'mysql',
+    //   host: 'localhost',
+    //   port: 3306,
+    //   username: 'root',
+    //   password: '',
+    //   database: 'courier_db',
+    //   // entities: [__dirname + '/entities/*.ts'], // Path to your entity files
+    //   entities: [User, PickupRequest, Packet, Profile, Vehicle, RefreshToken],
+    //   synchronize: true,
+    // }),
     UsersModule,
     AuthModule,
     PickupModule,

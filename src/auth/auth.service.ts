@@ -44,6 +44,18 @@ export class AuthService {
     return user;
   }
 
+  async validateAdminUser(email: string, password: string): Promise<any> {
+    // First validate the user credentials
+    const user = await this.validateUser(email, password);
+    
+    // Check if the user has Admin role
+    if (user.role !== Role.ADMIN) {
+      throw new UnauthorizedException('Access denied. Admin privileges required.');
+    }
+    
+    return user;
+  }
+
   async login(user: any) {
     const payload = { email: user.email, role: user.role, name: user.name };
     const accessToken = this.jwtService.sign(payload, { expiresIn: '30m' });
