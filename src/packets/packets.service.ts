@@ -121,7 +121,13 @@ export class PacketsService {
   }
 
   async agentConfirmCollection(id: number, weight?: number): Promise<Packet> {
-    const packet = await this.packetRepository.findOneBy({ id });
+    // const packet = await this.packetRepository.findOneBy({ id });
+
+    const packet = await this.packetRepository.findOne({
+      where: { id: id },
+      relations: ['pickup'], // Include relations if needed
+    });
+
     if (!packet) {
       throw new Error('Packet not found');
     }
@@ -130,6 +136,7 @@ export class PacketsService {
       packet.weight = weight;
     }
     packet.status = 'collected';
+    
     packet.collected_at = new Date();
 
     return this.packetRepository.save(packet);
