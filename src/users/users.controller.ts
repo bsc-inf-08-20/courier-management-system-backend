@@ -9,6 +9,7 @@ import {
   Request,
   Patch,
   Query,
+  NotFoundException,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { User } from 'src/entities/User.entity';
@@ -29,8 +30,8 @@ export class UsersController {
   }
 
   // get the city of the admin
-  @Get('me')
   @UseGuards(JwtAuthGuard)
+  @Get('me')
   async getAdminCity(@Request() req) {
     return this.usersService.getAdminCity(req.user.user_id);
   }
@@ -41,7 +42,6 @@ export class UsersController {
   async getMe(@Request() req) {
     return this.usersService.findOne(req.user.user_id);
   }
-
 
   // Get all users
   @Get()
@@ -61,6 +61,24 @@ export class UsersController {
   @Get(':id')
   async findOne(@Param('id') id: number): Promise<User | null> {
     return this.usersService.findUserById(id);
+  }
+
+  // get driver by driver by admin's city
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @Get('city/drivers')
+  async getDriversByCity(@Query('city') city: string) {
+    if (!city) {
+      throw new NotFoundException('City is required');
+    }
+
+    const drivers = await this.usersService.getDriversByCity(city);
+
+    if (!drivers || drivers.length === 0) {
+      throw new NotFoundException('No drivers found in this city');
+    }
+
+    return drivers;
   }
 
   @Patch(':id')

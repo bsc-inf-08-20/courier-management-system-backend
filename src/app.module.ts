@@ -15,12 +15,16 @@ import { PacketsModule } from './packets/packets.module';
 import { Profile } from './entities/Profile.entity';
 import { Vehicle } from './entities/Vehicle.entity';
 import { VehiclesModule } from './vehicles/vehicles.module';
+import { ConfigModule } from '@nestjs/config';
+import { RefreshToken } from './entities/RefreshToken.entity';
 import { MessagesModule } from './message/message.module';
 import { MessagesGateway } from './message_gateway/message_gateway.gateway';
-import { Message } from './entities/message.entity';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
     TypeOrmModule.forRoot({
       type: 'mysql',
       host: 'localhost',
@@ -29,7 +33,7 @@ import { Message } from './entities/message.entity';
       password: '',
       database: 'courier_db',
       // entities: [__dirname + '/entities/*.ts'], // Path to your entity files
-      entities: [User, PickupRequest, Packet,AgentConfirmPickup,Profile, Vehicle,Message],
+      entities: [User, PickupRequest, Packet, Profile, Vehicle, RefreshToken],
       synchronize: true,
     }),
     UsersModule,

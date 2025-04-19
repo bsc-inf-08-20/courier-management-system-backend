@@ -94,7 +94,7 @@ export class PickupService {
         status: 'assigned',
         assigned_agent: { user_id: agentId },
         packet: {
-          status: Not('collected'), // <-- New condition
+          status: Not('collected'), 
         },
       },
       relations: ['customer', 'assigned_agent', 'packet'],
@@ -109,7 +109,7 @@ export class PickupService {
     const [pickupRequest, agent, admin] = await Promise.all([
       this.pickupRepository.findOne({
         where: { id: requestId },
-        relations: ['packet', 'assigned_agent'],
+        relations: ['packet', 'assigned_agent'], // Ensure packet is loaded
       }),
       this.userRepository.findOne({
         where: { user_id: agentId },
@@ -135,9 +135,15 @@ export class PickupService {
     if (agent.city !== admin.city) {
       throw new ForbiddenException('You can only assign agents from your city');
     }
-
+  
+    // Assign agent to the PickupRequest
     pickupRequest.assigned_agent = agent;
     pickupRequest.status = 'assigned';
+  
+    // Assign agent to the Packet as assigned_driver
+    pickupRequest.packet.assigned_pickup_agent = agent;
+  
+    // Save the PickupRequest (this will cascade to the Packet due to eager: true and cascade: true)
     return this.pickupRepository.save(pickupRequest);
   }
 
