@@ -1,7 +1,7 @@
 // create-packet.dto.ts
 export class CreatePacketDto {
   description: string;
-  weight: number;
+  weight: string; // Frontend sends string
   category: string;
   instructions?: string;
   delivery_type: 'pickup' | 'delivery';
@@ -10,7 +10,6 @@ export class CreatePacketDto {
   destination_address: string;
   destination_coordinates: { lat: number; lng: number };
   destination_hub?: string;
-  status?: string;
   sender: {
     name: string;
     email: string;

@@ -15,16 +15,32 @@ import { PacketsModule } from './packets/packets.module';
 import { Profile } from './entities/Profile.entity';
 import { Vehicle } from './entities/Vehicle.entity';
 import { VehiclesModule } from './vehicles/vehicles.module';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { RefreshToken } from './entities/RefreshToken.entity';
 import { MessagesModule } from './message/message.module';
 import { MessagesGateway } from './message_gateway/message_gateway.gateway';
+import { AssignModule } from './assign/assign.module';
+import { MailModule } from './mails/mails.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    // TypeOrmModule.forRootAsync({
+    //   imports: [ConfigModule],
+    //   inject: [ConfigService],
+    //   useFactory: (config: ConfigService) => ({
+    //     type: 'mysql',
+    //     host: 'localhost',
+    //     port: config.get<number>('DB_PORT'),
+    //     username: config.get<string>('DB_USERNAME'),
+    //     password: config.get<string>('DB_PASSWORD'),
+    //     database: config.get<string>('DB_NAME'),
+    //     synchronize: true,
+    //     entities: [User, PickupRequest, Packet, Profile, Vehicle, RefreshToken],
+    //   }),
+    // }),
     TypeOrmModule.forRoot({
       type: 'mysql',
       host: 'localhost',
@@ -44,6 +60,8 @@ import { MessagesGateway } from './message_gateway/message_gateway.gateway';
     PacketsModule,
     VehiclesModule,
     MessagesModule,
+    AssignModule,
+    MailModule,
   
   ],
   controllers: [AppController],

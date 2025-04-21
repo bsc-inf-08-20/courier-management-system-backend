@@ -12,10 +12,13 @@ import { Packet } from 'src/entities/Packet.entity';
 import { User } from 'src/entities/User.entity';
 import { Vehicle } from 'src/entities/Vehicle.entity';
 import { Role } from 'src/enum/role.enum';
-import { sendMail } from 'src/utils/mail';
+import { CreatePacketDto } from 'src/dto/create-packet.dto';
+
+
 
 @Injectable()
 export class PacketsService {
+  assignToAgent: any;
   constructor(
     @InjectRepository(Packet)
     private readonly packetRepository: Repository<Packet>,
@@ -26,29 +29,43 @@ export class PacketsService {
   ) {}
 
   //create packet from admin's panel
-  async createPacket(packetData: Partial<Packet>, admin: any): Promise<Packet> {
-    // Prepare the packet data with default values and validation
+  // async createPacket(packetData: Partial<Packet>, admin: any): Promise<Packet> {
+  //   // Prepare the packet data with default values and validation
+  //   const packet = this.packetRepository.create({
+  //     description: packetData.description || '',
+  //     weight: packetData.weight || 0,
+  //     category: packetData.category || 'other',
+  //     instructions: packetData.instructions || '',
+  //     origin_address: packetData.origin_address || '',
+  //     origin_coordinates: packetData.origin_coordinates || { lat: 0, lng: 0 },
+  //     destination_address: packetData.destination_address || '',
+  //     destination_coordinates: packetData.destination_coordinates || { lat: 0, lng: 0 },
+  //     delivery_type: packetData.delivery_type || 'pickup',
+  //     destination_hub: packetData.destination_hub || '',
+  //     sender: packetData.sender || { name: '', email: '', phone_number: '' },
+  //     receiver: packetData.receiver || { name: '', email: '', phone_number: '' },
+  //     status: packetData.status || 'pending', // Default to 'pending', but can be overridden
+  //   });
+
+  //   // Save the packet to the database
+  //   const savedPacket = await this.packetRepository.save(packet);
+
+  //   return savedPacket;
+  // }
+
+  async createPacket(packetData: CreatePacketDto): Promise<Packet> {
+    // Convert weight to number
+    const weight = parseFloat(packetData.weight);
+    
+    // Create packet with exact data (no defaults)
     const packet = this.packetRepository.create({
-      description: packetData.description || '',
-      weight: packetData.weight || 0,
-      category: packetData.category || 'other',
-      instructions: packetData.instructions || '',
-      origin_address: packetData.origin_address || '',
-      origin_coordinates: packetData.origin_coordinates || { lat: 0, lng: 0 },
-      destination_address: packetData.destination_address || '',
-      destination_coordinates: packetData.destination_coordinates || { lat: 0, lng: 0 },
-      delivery_type: packetData.delivery_type || 'pickup',
-      destination_hub: packetData.destination_hub || '',
-      sender: packetData.sender || { name: '', email: '', phone_number: '' },
-      receiver: packetData.receiver || { name: '', email: '', phone_number: '' },
-      status: packetData.status || 'pending', // Default to 'pending', but can be overridden
+      ...packetData,
+      weight,
+      status: 'at_origin_hub', // Only default we want
     });
 
-    // Save the packet to the database
-    const savedPacket = await this.packetRepository.save(packet);
-
-    return savedPacket;
-  }
+    return this.packetRepository.save(packet);
+}
 
   // Fetch all packets from DB
   async getAllPackets(): Promise<Packet[]> {
@@ -107,7 +124,13 @@ export class PacketsService {
   }
 
   async agentConfirmCollection(id: number, weight?: number): Promise<Packet> {
-    const packet = await this.packetRepository.findOneBy({ id });
+    // const packet = await this.packetRepository.findOneBy({ id });
+
+    const packet = await this.packetRepository.findOne({
+      where: { id: id },
+      relations: ['pickup'], // Include relations if needed
+    });
+
     if (!packet) {
       throw new Error('Packet not found');
     }
@@ -116,6 +139,7 @@ export class PacketsService {
       packet.weight = weight;
     }
     packet.status = 'collected';
+    
     packet.collected_at = new Date();
 
     return this.packetRepository.save(packet);
@@ -257,25 +281,25 @@ export class PacketsService {
       packet.assigned_vehicle = vehicle;
       packet.dispatched_at = new Date();
 
-      // Sending an email to the assigned agent about the packet dispatch
-      if (packet.pickup?.assigned_agent) {
-        const agent = packet.pickup.assigned_agent;
-        const admin = await this.userRepository.findOne({ where: { user_id: driverId } }); // Get admin's details
+      // // Sending an email to the assigned agent about the packet dispatch
+      // if (packet.pickup?.assigned_agent) {
+      //   const agent = packet.pickup.assigned_agent;
+      //   const admin = await this.userRepository.findOne({ where: { user_id: driverId } }); // Get admin's details
 
-        if (admin && agent.email) {
-          await sendMail({
-            to: agent.email,
-            name: agent.name,
-            subject: 'Packet Assigned',
-            body: `
-              <p>Hello ${agent.name},</p>
-              <p>You have been assigned a packet for pickup. Details:</p>
-              <p>Packet ID: ${packet.id}</p>
-              <p>Assigned by: ${admin.name}</p>
-            `
-          });
-        }
-      }
+      //   if (admin && agent.email) {
+      //     await sendMail({
+      //       to: agent.email,
+      //       name: agent.name,
+      //       subject: 'Packet Assigned',
+      //       body: `
+      //         <p>Hello ${agent.name},</p>
+      //         <p>You have been assigned a packet for pickup. Details:</p>
+      //         <p>Packet ID: ${packet.id}</p>
+      //         <p>Assigned by: ${admin.name}</p>
+      //       `
+      //     });
+      //   }
+      // }
     }
 
     vehicle.assigned_driver = driver;
@@ -329,8 +353,8 @@ export class PacketsService {
       relations: [
         'pickup',
         'pickup.customer',
-        'assigned_driver',
-        'assigned_vehicle',
+        'assigned_vehicle', // This gets the vehicle
+        'assigned_vehicle.assigned_driver'
       ],
       order: {
         dispatched_at: 'DESC',
@@ -443,7 +467,7 @@ export class PacketsService {
         is_in_maintenance: false,
         status: 'available', // Only return available vehicles
       },
-      relations: ['assigned_packets'],
+      relations: ['assigned_packets', 'assigned_driver'],
     });
   }
 

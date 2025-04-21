@@ -33,8 +33,8 @@ export class PacketsController {
     @Body() createPacketDto: CreatePacketDto,
     @Request() req,
   ): Promise<Packet> {
-    const admin = req.user; // Assuming user is attached via JWT or auth middleware
-    return this.packetsService.createPacket(createPacketDto, admin);
+    // const admin = req.user; // Assuming user is attached via JWT or auth middleware
+    return this.packetsService.createPacket(createPacketDto);
   }
 
 
@@ -75,6 +75,21 @@ export class PacketsController {
     return this.packetsService.updateWeight(+id, updatePacketWeightDto.weight);
   }
 
+  @Patch(':id/agent-confirm')
+  async agentConfirmCollection(
+    @Param('id') id: string,
+    @Body() updatePacketDto: UpdatePacketWeightDto,
+  ) {
+    if (isNaN(Number(id))) {
+      throw new BadRequestException('Invalid packet ID');
+    }
+
+    return this.packetsService.agentConfirmCollection(
+      +id,
+      updatePacketDto.weight,
+    );
+  }
+
   // @Patch(':id/agent-confirm')
   // async agentConfirmCollection(
   //   @Param('id') id: string,
@@ -91,17 +106,17 @@ export class PacketsController {
   // }
 
 
-  @Patch(':id/agent-confirm')
-  async agentConfirmCollection(
-    @Param('id') id: string,
-    @Body() updatePacketDto: UpdatePacketWeightDto,
-  ) {
-    if (isNaN(Number(id))) {
-      throw new BadRequestException('Invalid packet ID');
-    }
+  // @Patch(':id/agent-confirm')
+  // async agentConfirmCollection(
+  //   @Param('id') id: string,
+  //   @Body() updatePacketDto: UpdatePacketWeightDto,
+  // ) {
+  //   if (isNaN(Number(id))) {
+  //     throw new BadRequestException('Invalid packet ID');
+  //   }
 
-    return this.packetsService.agentConfirmCollection(+id, updatePacketDto.weight);
-  }
+  //   return this.packetsService.agentConfirmCollection(+id, updatePacketDto.weight);
+  // }
 
   // @Patch(':id/agent-confirm')
   // @UseGuards(JwtAuthGuard, RolesGuard)

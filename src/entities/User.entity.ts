@@ -13,6 +13,7 @@ import { PickupRequest } from './PickupRequest.entity';
 import { Profile } from './Profile.entity';
 import { Vehicle } from './Vehicle.entity';
 import { RefreshToken } from './RefreshToken.entity';
+import { Exclude, Type } from 'class-transformer';
 
 @Entity() // Marks this class as a database table
 export class User {
@@ -61,8 +62,11 @@ export class User {
   @OneToMany(() => RefreshToken, (refreshToken) => refreshToken.user)
   refreshTokens: RefreshToken[];
 
-  @OneToOne(() => Vehicle, (vehicle) => vehicle.assigned_driver, { nullable: true })
-  assignedVehicle: Vehicle | null;
+  @OneToOne(() => Vehicle, (vehicle) => vehicle.assigned_driver, {
+    nullable: true,
+  })
+  @Type(() => Vehicle)
+  assignedVehicle: Vehicle | null; // Inverse side
 
   @Column()
   current_city: string;
