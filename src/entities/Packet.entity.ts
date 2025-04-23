@@ -5,15 +5,27 @@ import {
   OneToOne,
   JoinColumn,
   ManyToOne,
+  BeforeInsert,
 } from 'typeorm';
 import { PickupRequest } from './PickupRequest.entity';
 import { User } from './User.entity';
 import { Vehicle } from './Vehicle.entity';
+import { v4 as uuidv4 } from 'uuid'; // ✅ Import UUID
 
 @Entity()
 export class Packet {
   @PrimaryGeneratedColumn()
   id: number;
+
+  @Column({ unique: true })
+  trackingId: string; // 🆕 Added for tracking
+  
+
+  
+  @BeforeInsert() // ✅ Lifecycle hook to auto-generate tracking ID
+  generateTrackingId() {
+    this.trackingId = `TRK-${uuidv4().slice(0, 8).toUpperCase()}`;
+  }
 
   @Column()
   description: string;

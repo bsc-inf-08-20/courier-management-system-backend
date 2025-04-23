@@ -89,7 +89,19 @@ export class PacketsController {
       updatePacketDto.weight,
     );
   }
+ 
+  @Get('track/:trackingId/status')
+@UseGuards(JwtAuthGuard)
+async trackPacketStatus(@Param('trackingId') trackingId: string) {
+  // Call the correct service method without parsing trackingId
+  const status = await this.packetsService.trackPacket(trackingId);
+  if (!status) {
+    throw new BadRequestException('Packet not found');
+  }
+  return status;
+}
 
+  
   // @Patch(':id/agent-confirm')
   // async agentConfirmCollection(
   //   @Param('id') id: string,

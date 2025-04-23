@@ -19,6 +19,7 @@ import { CreatePacketDto } from 'src/dto/create-packet.dto';
 @Injectable()
 export class PacketsService {
   assignToAgent: any;
+  getPacketStatus: any;
   constructor(
     @InjectRepository(Packet)
     private readonly packetRepository: Repository<Packet>,
@@ -553,10 +554,6 @@ export class PacketsService {
     return this.packetRepository.save(packet);
   }
 
-
-
-
-  //HANDLING RECEIVING PACKET 
   // Fetch packets at the destination hub (ready for delivery agent assignment)
   async getPacketsAtDestinationHub(city: string): Promise<Packet[]> {
     return this.packetRepository.find({
@@ -649,4 +646,34 @@ export class PacketsService {
 
     return this.packetRepository.save(packet);
   }
+
+  
+  // ✅ NEW: Track the movement of a parcel by returning its status and timestamps
+    async trackPacket(trackingId: string): Promise<{
+      status: string;
+      collected_at?: Date;
+      origin_hub_confirmed_at?: Date;
+      dispatched_at?: Date;
+      destination_hub_confirmed_at?: Date;
+      out_for_delivery_at?: Date;
+      delivered_at?: Date;
+      received_at?: Date;
+    }> {
+      const packet = await this.packetRepository.findOneBy({trackingId});
+      if (!packet) {
+        throw new NotFoundException('Packet not found');
+      }
+  
+      // Return all the key tracking info
+      return {
+        status: packet.status,
+        collected_at: packet.collected_at,
+        origin_hub_confirmed_at: packet.origin_hub_confirmed_at,
+        dispatched_at: packet.dispatched_at,
+        destination_hub_confirmed_at: packet.destination_hub_confirmed_at,
+        out_for_delivery_at: packet.out_for_delivery_at,
+        delivered_at: packet.delivered_at,
+        received_at: packet.received_at,
+      };
+    }
 }
