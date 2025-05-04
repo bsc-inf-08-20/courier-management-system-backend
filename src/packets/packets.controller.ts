@@ -6,6 +6,7 @@ import {
   HttpException,
   HttpStatus,
   Param,
+  ParseIntPipe,
   Patch,
   Post,
   Query,
@@ -36,8 +37,6 @@ export class PacketsController {
     // const admin = req.user; // Assuming user is attached via JWT or auth middleware
     return this.packetsService.createPacket(createPacketDto);
   }
-
-
 
   // GET all packets
   @Get()
@@ -173,8 +172,6 @@ export class PacketsController {
     return this.packetsService.getPacketsInTransitIcoming(origin);
   }
 
-
-
   @Patch(':id/destination-hub-confirm')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
@@ -214,8 +211,7 @@ export class PacketsController {
     );
   }
 
-
-  // Dealing with disptching 
+  // Dealing with disptching
 
   @UseGuards(JwtAuthGuard)
   @Post('assign-to-vehicle')
@@ -224,7 +220,11 @@ export class PacketsController {
     @Body('vehicleId') vehicleId: number,
     @Request() req,
   ): Promise<Packet> {
-    return this.packetsService.assignPacketToVehicle(packetId, vehicleId, req.user);
+    return this.packetsService.assignPacketToVehicle(
+      packetId,
+      vehicleId,
+      req.user,
+    );
   }
 
   @UseGuards(JwtAuthGuard)
@@ -234,7 +234,11 @@ export class PacketsController {
     @Body('vehicleId') vehicleId: number,
     @Request() req,
   ): Promise<Packet[]> {
-    return this.packetsService.assignMultiplePacketsToVehicle(packetIds, vehicleId, req.user);
+    return this.packetsService.assignMultiplePacketsToVehicle(
+      packetIds,
+      vehicleId,
+      req.user,
+    );
   }
 
   @UseGuards(JwtAuthGuard)
@@ -264,17 +268,20 @@ export class PacketsController {
     return this.packetsService.unassignPacketFromVehicle(packetId, req.user);
   }
 
-
   // DEALING WITH DELIVERY
   @UseGuards(JwtAuthGuard)
   @Get('at-destination-hub')
-  async getPacketsAtDestinationHub(@Query('city') city: string): Promise<Packet[]> {
+  async getPacketsAtDestinationHub(
+    @Query('city') city: string,
+  ): Promise<Packet[]> {
     return this.packetsService.getPacketsAtDestinationHub(city);
   }
 
   @UseGuards(JwtAuthGuard)
   @Get('out-for-delivery')
-  async getPacketsOutForDelivery(@Query('city') city: string): Promise<Packet[]> {
+  async getPacketsOutForDelivery(
+    @Query('city') city: string,
+  ): Promise<Packet[]> {
     return this.packetsService.getPacketsOutForDelivery(city);
   }
 
@@ -304,5 +311,15 @@ export class PacketsController {
     @Request() req,
   ): Promise<Packet> {
     return this.packetsService.confirmDelivery(packetId, req.user);
+  }
+
+  // get the origin-coordinates
+  @Get(':id/origin-coordinates')
+  async getOriginCoordinates(@Param('id', ParseIntPipe) id: number) {
+    return this.packetsService.getPacketOriginCoordinates(id);
+  }
+  @Get(':id/destination-coordinates')
+  async getDestinationCoordinates(@Param('id') id: number) {
+    return this.packetsService.getPacketDestinationCoordinates(id);
   }
 }

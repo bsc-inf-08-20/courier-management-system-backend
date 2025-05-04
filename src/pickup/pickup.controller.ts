@@ -17,7 +17,7 @@ import { PickupService } from './pickup.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { Roles } from '../decorators/roles.decorator';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
-import { PickupRequestDto } from '../dto/pickup-request.dto';
+import { CreatePacketDto } from 'src/dto/pickup-request.dto';
 import { Role } from 'src/enum/role.enum';
 import { AssignAgentDto } from 'src/dto/assign-agent.dto';
 import { PickupRequest } from 'src/entities/PickupRequest.entity';
@@ -40,7 +40,7 @@ export class PickupController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.USER)
   @Post('request')
-  async requestPickup(@Request() req, @Body() pickupData: PickupRequestDto) {
+  async requestPickup(@Request() req, @Body() pickupData: CreatePacketDto) {
     return this.pickupService.requestPickup(req.user.user_id, pickupData);
   }
 

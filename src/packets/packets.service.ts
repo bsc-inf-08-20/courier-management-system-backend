@@ -626,4 +626,50 @@ export class PacketsService {
 
     return this.packetRepository.save(packet);
   }
+
+
+  // fetches all packets assigned to a specific agent (either as pickup or delivery agent)
+  async findByAgent(agentId: number): Promise<Packet[]> {
+    return this.packetRepository.find({
+      where: [
+        { assigned_pickup_agent: { user_id: agentId } },
+        { assigned_delivery_agent: { user_id: agentId } }
+      ],
+      relations: [
+        'assigned_pickup_agent',
+        'assigned_delivery_agent',
+        'assigned_vehicle',
+        'pickup'
+      ],
+      order: {
+        status: 'ASC', // Optional: order by status
+        collected_at: 'DESC' // Optional: newest first
+      }
+    });
+  }
+
+  //get the packets coordinates
+   async getPacketOriginCoordinates(packetId: number) {
+    const packet = await this.packetRepository.findOne({
+      where: { id: packetId },
+      select: ['origin_coordinates']
+    });
+  
+    if (!packet) throw new NotFoundException('Packet not found');
+    return packet.origin_coordinates;
+  }
+
+  async getPacketDestinationCoordinates(packetId: number) {
+    const packet = await this.packetRepository.findOne({
+      where: { id: packetId },
+      select: ['destination_coordinates']
+    });
+  
+    if (!packet) throw new NotFoundException('Packet not found');
+    return packet.destination_coordinates;
+  }
+
+  async updatePacketStatus(packetId: number, status: string) {
+    await this.packetRepository.update(packetId, { status });
+  }
 }

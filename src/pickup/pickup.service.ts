@@ -7,7 +7,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Not, Repository } from 'typeorm';
 import { PickupRequest } from '../entities/PickupRequest.entity';
-import { PickupRequestDto } from '../dto/pickup-request.dto';
+import { CreatePacketDto } from 'src/dto/pickup-request.dto';
 import { User } from '../entities/User.entity';
 import { Role } from 'src/enum/role.enum';
 import { Packet } from 'src/entities/Packet.entity';
@@ -23,40 +23,57 @@ export class PickupService {
     private packetRepository: Repository<Packet>,
   ) {}
 
-  // ✅ Add packets when booking a pickup
-  async requestPickup(
-    customerId: number,
-    pickupData: any,
-  ): Promise<PickupRequest> {
+  //  Add packets when booking a pickup
+  async requestPickup(customerId: number, pickupData: CreatePacketDto) {
     const customer = await this.userRepository.findOne({
       where: { user_id: customerId },
     });
-
-    console.log(customer, customer?.user_id);
-
+  
     if (!customer) throw new Error('Customer not found');
-
-    // ✅ Create the packet with origin & destination based on pickup details
+  
     const packet = this.packetRepository.create({
       description: pickupData.packet_description,
       weight: pickupData.packet_weight,
       category: pickupData.packet_category,
+      instructions: pickupData.instructions,
       status: 'pending',
-      origin_address: pickupData.pickup_address, // ✅ Set origin from pickup address
-      destination_address: pickupData.destination_address, // ✅ Set destination
+      delivery_type: pickupData.delivery_type,
+      origin_address: pickupData.pickup_address,
+      destination_address: pickupData.destination_address,
+      destination_hub: pickupData.destination_hub,
+      sender: {
+        name: pickupData.sender.name,
+        email: pickupData.sender.email,
+        phone_number: pickupData.sender.phone_number
+      },
+      receiver: {
+        name: pickupData.receiver.name,
+        email: pickupData.receiver.email,
+        phone_number: pickupData.receiver.phone_number
+      },
+      origin_coordinates: {
+        lat: pickupData.origin_coordinates.lat,
+        lng: pickupData.origin_coordinates.lng
+      },
+      destination_coordinates: {
+        lat: pickupData.destination_coordinates.lat,
+        lng: pickupData.destination_coordinates.lng
+      },
+
+      pickup_window_start: new Date(pickupData.pickup_window.start),
+  pickup_window_end: new Date(pickupData.pickup_window.end)
     });
-
+  
     const savedPacket = await this.packetRepository.save(packet);
-
-    //  Create the pickup request and link the packet
+  
     const pickupRequest = this.pickupRepository.create({
       customer,
       pickup_address: pickupData.pickup_address,
       destination_address: pickupData.destination_address,
-      packet: savedPacket, // ✅ Link the single packet to this pickup request
+      packet: savedPacket,
       status: 'pending',
     });
-
+  
     return this.pickupRepository.save(pickupRequest);
   }
 
