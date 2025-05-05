@@ -325,7 +325,7 @@ export class PacketsController {
     return this.packetsService.confirmDelivery(packetId, req.user);
   }
 
-  // get agents packets to be collected or assingned
+  // get agent's packets to be collected or assingned
   @Get('agents/:id/assigned-packets')
   async getAssignedPackets(@Param('id') id: string) {
     const agentId = parseInt(id);
@@ -334,4 +334,15 @@ export class PacketsController {
     }
     return this.packetsService.getAssignedPacketsForAgent(agentId);
   }
+
+  // get packets to be delivered by the agent
+  @Get('agents/:id/packets-deliver')
+  async getPacketsToDeliver(@Param('id') id: string) {
+    const agentId = parseInt(id);
+    if (isNaN(agentId)) {
+      throw new BadRequestException('Invalid agent ID');
+    }
+    return this.packetsService.getAssignedPacketsForDeliveryAgent(agentId);
+  }
+
 }

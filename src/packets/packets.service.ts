@@ -715,11 +715,27 @@ export class PacketsService {
     return this.packetRepository.createQueryBuilder('packet')
       .leftJoinAndSelect('packet.assigned_pickup_agent', 'agent')
       .where('agent.user_id = :agentId', { agentId })
-      .andWhere('packet.status != :status', { status: 'collected' })
+      .andWhere('packet.status = :status', { status: 'pending' }) // Explicitly check for 'pending'
       .select([
         'packet.id',
         'packet.description',
         'packet.origin_coordinates',
+        'packet.status',
+        'agent.user_id'
+      ])
+      .getMany();
+  }
+
+  // get assigned packets for agent for delivery
+  async getAssignedPacketsForDeliveryAgent(agentId: number): Promise<Packet[]> {
+     return this.packetRepository.createQueryBuilder('packet')
+      .leftJoinAndSelect('packet.assigned_delivery_agent', 'agent')
+      .where('agent.user_id = :agentId', { agentId })
+      .andWhere('packet.status = :status', { status: 'out_for_delivery' }) // Explicitly check for 'out_for_delivery'
+      .select([
+        'packet.id',
+        'packet.description',
+        'packet.destination_coordinates',
         'packet.status',
         'agent.user_id'
       ])
