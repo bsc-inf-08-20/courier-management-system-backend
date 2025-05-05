@@ -57,7 +57,12 @@ export class AuthService {
   }
 
   async login(user: any) {
-    const payload = { email: user.email, role: user.role, name: user.name };
+    const payload = { 
+      email: user.email, 
+      role: user.role, 
+      name: user.name, 
+      user_id: user.user_id // Add user_id here
+    };
     const accessToken = this.jwtService.sign(payload, { expiresIn: '30m' });
     const refreshToken = await this.generateRefreshToken(user);
 
@@ -117,6 +122,7 @@ export class AuthService {
           email: payload.email,
           role: payload.role,
           name: storedToken.user.name,
+          user_id: storedToken.user_id, // Add user_id here
         },
         { expiresIn: '30m' },
       );

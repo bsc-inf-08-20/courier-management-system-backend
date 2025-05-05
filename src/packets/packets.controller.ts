@@ -52,6 +52,18 @@ export class PacketsController {
     return this.packetsService.getPacketsForAdmin(req.user.user_id);
   }
 
+  // get the origin-coordinates
+  @Get(':id/origin-coordinates')
+  async getOriginCoordinates(@Param('id', ParseIntPipe) id: number) {
+    return this.packetsService.getPacketOriginCoordinates(id);
+  }
+
+  // get the destination-coordinates
+  @Get(':id/destination-coordinates')
+  async getDestinationCoordinates(@Param('id') id: number) {
+    return this.packetsService.getPacketDestinationCoordinates(id);
+  }
+
   // Admins in Lilongwe, Blantyre, or Zomba confirm dispatch:
   @Patch(':id/confirm-dispatch')
   async confirmDispatch(@Param('id') id: number) {
@@ -313,13 +325,13 @@ export class PacketsController {
     return this.packetsService.confirmDelivery(packetId, req.user);
   }
 
-  // get the origin-coordinates
-  @Get(':id/origin-coordinates')
-  async getOriginCoordinates(@Param('id', ParseIntPipe) id: number) {
-    return this.packetsService.getPacketOriginCoordinates(id);
-  }
-  @Get(':id/destination-coordinates')
-  async getDestinationCoordinates(@Param('id') id: number) {
-    return this.packetsService.getPacketDestinationCoordinates(id);
+  // get agents packets to be collected or assingned
+  @Get('agents/:id/assigned-packets')
+  async getAssignedPackets(@Param('id') id: string) {
+    const agentId = parseInt(id);
+    if (isNaN(agentId)) {
+      throw new BadRequestException('Invalid agent ID');
+    }
+    return this.packetsService.getAssignedPacketsForAgent(agentId);
   }
 }

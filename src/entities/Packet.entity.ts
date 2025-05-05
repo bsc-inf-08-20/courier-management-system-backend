@@ -43,14 +43,14 @@ export class Packet {
   @Column()
   instructions: string;
 
-  @Column('json', { nullable: true })
+  @Column('simple-json', { nullable: true })
   sender: {
     name: string;
     email: string;
     phone_number: string;
   }; // Sender details
 
-  @Column('json', { nullable: true })
+  @Column('simple-json', { nullable: true })
   receiver: {
     name: string;
     email: string;
@@ -70,13 +70,13 @@ pickup_window_end: Date;@Column({ type: 'timestamp', nullable: true })
   @Column()
   origin_address: string;
 
-  @Column('json', { nullable: true })
+  @Column('simple-json', { nullable: true })
   origin_coordinates: { lat: number; lng: number };
 
   @Column()
   destination_address: string;
 
-  @Column('json', { nullable: true })
+  @Column('simple-json', { nullable: true })
   destination_coordinates: { lat: number; lng: number };
 
   @Column({ type: 'varchar', length: 50, nullable: true })
