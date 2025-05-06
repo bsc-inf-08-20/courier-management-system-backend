@@ -5,6 +5,7 @@ import {
   Post,
   UseGuards,
   Body,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { LocalAuthGuard } from './auth/guards/local-auth.guard';
@@ -31,6 +32,44 @@ export class AppController {
       loginDto.password,
     );
     return this.authService.login(user);
+  }
+
+  @Post('agent/login')
+  async agentLogin(@Body() loginDto: LoginDto) {
+    const user = await this.authService.validateAgentUser(
+      loginDto.email,
+      loginDto.password,
+    );
+    return this.authService.login(user);
+  }
+
+  @Post('customer/login')
+  async userLogin(@Body() loginDto: LoginDto) {
+    const user = await this.authService.validateCustomerUser(
+      loginDto.email,
+      loginDto.password,
+    );
+    return this.authService.login(user);
+  }
+
+  @Post('auth/validate-admin')
+  async validateRole(@Body() credentials: { email: string; password: string }) {
+    const user = await this.authService.validateUser(
+      credentials.email,
+      credentials.password,
+    );
+
+    if (!user) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    return {
+      role: user.role,
+      message:
+        user.role === 'ADMIN'
+          ? 'Valid administrator account'
+          : 'Invalid role for admin portal',
+    };
   }
 
   @Post('auth/refresh')

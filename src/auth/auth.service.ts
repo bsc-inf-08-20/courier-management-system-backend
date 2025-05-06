@@ -56,6 +56,30 @@ export class AuthService {
     return user;
   }
 
+  async validateAgentUser(email: string, password: string): Promise<any> {
+    // First validate the user credentials
+    const user = await this.validateUser(email, password);
+    
+    // Check if the user has Agent role
+    if (user.role !== Role.AGENT) {
+      throw new UnauthorizedException('Access denied. Agent privileges required.');
+    }
+    
+    return user;
+  }
+
+  async validateCustomerUser(email: string, password: string): Promise<any> {
+    // First validate the user credentials
+    const user = await this.validateUser(email, password);
+    
+    // Check if the user has Customer role
+    if (user.role !== Role.USER) {
+      throw new UnauthorizedException('Access denied. Customer privileges required.');
+    }
+    
+    return user;
+  }
+
   async login(user: any) {
     const payload = { 
       email: user.email, 
