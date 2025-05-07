@@ -24,7 +24,7 @@ export class Packet {
   
   @BeforeInsert() // ✅ Lifecycle hook to auto-generate tracking ID
   generateTrackingId() {
-    this.trackingId = `TRK-${uuidv4().slice(0, 8).toUpperCase()}`;
+    this.trackingId = `${uuidv4().slice(0, 8).toUpperCase()}`;
   }
 
   @Column()
