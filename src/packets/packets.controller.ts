@@ -6,6 +6,7 @@ import {
   HttpException,
   HttpStatus,
   Param,
+  ParseIntPipe,
   Patch,
   Post,
   Query,
@@ -37,8 +38,6 @@ export class PacketsController {
     return this.packetsService.createPacket(createPacketDto);
   }
 
-
-
   // GET all packets
   @Get()
   async getAllPackets() {
@@ -51,6 +50,18 @@ export class PacketsController {
   @Roles(Role.ADMIN)
   async getAdminPackets(@Request() req) {
     return this.packetsService.getPacketsForAdmin(req.user.user_id);
+  }
+
+  // get the origin-coordinates
+  @Get(':id/origin-coordinates')
+  async getOriginCoordinates(@Param('id', ParseIntPipe) id: number) {
+    return this.packetsService.getPacketOriginCoordinates(id);
+  }
+
+  // get the destination-coordinates
+  @Get(':id/destination-coordinates')
+  async getDestinationCoordinates(@Param('id') id: number) {
+    return this.packetsService.getPacketDestinationCoordinates(id);
   }
 
   // Admins in Lilongwe, Blantyre, or Zomba confirm dispatch:
@@ -173,8 +184,6 @@ export class PacketsController {
     return this.packetsService.getPacketsInTransitIcoming(origin);
   }
 
-
-
   @Patch(':id/destination-hub-confirm')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
@@ -214,8 +223,7 @@ export class PacketsController {
     );
   }
 
-
-  // Dealing with disptching 
+  // Dealing with disptching
 
   @UseGuards(JwtAuthGuard)
   @Post('assign-to-vehicle')
@@ -224,7 +232,11 @@ export class PacketsController {
     @Body('vehicleId') vehicleId: number,
     @Request() req,
   ): Promise<Packet> {
-    return this.packetsService.assignPacketToVehicle(packetId, vehicleId, req.user);
+    return this.packetsService.assignPacketToVehicle(
+      packetId,
+      vehicleId,
+      req.user,
+    );
   }
 
   @UseGuards(JwtAuthGuard)
@@ -234,7 +246,11 @@ export class PacketsController {
     @Body('vehicleId') vehicleId: number,
     @Request() req,
   ): Promise<Packet[]> {
-    return this.packetsService.assignMultiplePacketsToVehicle(packetIds, vehicleId, req.user);
+    return this.packetsService.assignMultiplePacketsToVehicle(
+      packetIds,
+      vehicleId,
+      req.user,
+    );
   }
 
   @UseGuards(JwtAuthGuard)
@@ -264,17 +280,20 @@ export class PacketsController {
     return this.packetsService.unassignPacketFromVehicle(packetId, req.user);
   }
 
-
   // DEALING WITH DELIVERY
   @UseGuards(JwtAuthGuard)
   @Get('at-destination-hub')
-  async getPacketsAtDestinationHub(@Query('city') city: string): Promise<Packet[]> {
+  async getPacketsAtDestinationHub(
+    @Query('city') city: string,
+  ): Promise<Packet[]> {
     return this.packetsService.getPacketsAtDestinationHub(city);
   }
 
   @UseGuards(JwtAuthGuard)
   @Get('out-for-delivery')
-  async getPacketsOutForDelivery(@Query('city') city: string): Promise<Packet[]> {
+  async getPacketsOutForDelivery(
+    @Query('city') city: string,
+  ): Promise<Packet[]> {
     return this.packetsService.getPacketsOutForDelivery(city);
   }
 
@@ -305,4 +324,25 @@ export class PacketsController {
   ): Promise<Packet> {
     return this.packetsService.confirmDelivery(packetId, req.user);
   }
+
+  // get agent's packets to be collected or assingned
+  @Get('agents/:id/assigned-packets')
+  async getAssignedPackets(@Param('id') id: string) {
+    const agentId = parseInt(id);
+    if (isNaN(agentId)) {
+      throw new BadRequestException('Invalid agent ID');
+    }
+    return this.packetsService.getAssignedPacketsForAgent(agentId);
+  }
+
+  // get packets to be delivered by the agent
+  @Get('agents/:id/packets-deliver')
+  async getPacketsToDeliver(@Param('id') id: string) {
+    const agentId = parseInt(id);
+    if (isNaN(agentId)) {
+      throw new BadRequestException('Invalid agent ID');
+    }
+    return this.packetsService.getAssignedPacketsForDeliveryAgent(agentId);
+  }
+
 }

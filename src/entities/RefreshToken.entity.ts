@@ -15,6 +15,9 @@ export class RefreshToken {
   @ManyToOne(() => User, (user) => user.refreshTokens)
   user: User;
 
+  @Column()
+  user_id: number;
+
   @Column({ default: false })
   isRevoked: boolean;
 }
