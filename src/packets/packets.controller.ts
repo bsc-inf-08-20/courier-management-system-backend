@@ -6,6 +6,7 @@ import {
   HttpException,
   HttpStatus,
   Param,
+  ParseIntPipe,
   Patch,
   Post,
   Query,
@@ -51,6 +52,18 @@ export class PacketsController {
   @Roles(Role.ADMIN)
   async getAdminPackets(@Request() req) {
     return this.packetsService.getPacketsForAdmin(req.user.user_id);
+  }
+
+  // get the origin-coordinates
+  @Get(':id/origin-coordinates')
+  async getOriginCoordinates(@Param('id', ParseIntPipe) id: number) {
+    return this.packetsService.getPacketOriginCoordinates(id);
+  }
+
+  // get the destination-coordinates
+  @Get(':id/destination-coordinates')
+  async getDestinationCoordinates(@Param('id') id: number) {
+    return this.packetsService.getPacketDestinationCoordinates(id);
   }
 
   // Admins in Lilongwe, Blantyre, or Zomba confirm dispatch:

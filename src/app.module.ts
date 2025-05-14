@@ -21,37 +21,29 @@ import { MessagesModule } from './message/message.module';
 import { MessagesGateway } from './message_gateway/message_gateway.gateway';
 import { AssignModule } from './assign/assign.module';
 import { MailModule } from './mails/mails.module';
+import { TrackingModule } from './tracking/tracking.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-    // TypeOrmModule.forRootAsync({
-    //   imports: [ConfigModule],
-    //   inject: [ConfigService],
-    //   useFactory: (config: ConfigService) => ({
-    //     type: 'mysql',
-    //     host: 'localhost',
-    //     port: config.get<number>('DB_PORT'),
-    //     username: config.get<string>('DB_USERNAME'),
-    //     password: config.get<string>('DB_PASSWORD'),
-    //     database: config.get<string>('DB_NAME'),
-    //     synchronize: true,
-    //     entities: [User, PickupRequest, Packet, Profile, Vehicle, RefreshToken],
-    //   }),
-    // }),
-    TypeOrmModule.forRoot({
-      type: 'mysql',
-      host: 'localhost',
-      port: 3306,
-      username: 'root',
-      password: '',
-      database: 'courier_db',
-      // entities: [__dirname + '/entities/*.ts'], // Path to your entity files
-      entities: [User, PickupRequest, Packet, Profile, Vehicle, RefreshToken],
-      synchronize: true,
+    
+       TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        type: 'mysql',
+        host: 'localhost',
+        port: config.get<number>('DB_PORT'),
+        username: config.get<string>('DB_USERNAME'),
+        password: config.get<string>('DB_PASSWORD'),
+        database: config.get<string>('DB_NAME'),
+        synchronize: true,
+        entities: [User, PickupRequest, Packet, Profile, Vehicle, RefreshToken],
+      }),
     }),
+    
     UsersModule,
     AuthModule,
     PickupModule,
@@ -62,6 +54,7 @@ import { MailModule } from './mails/mails.module';
     MessagesModule,
     AssignModule,
     MailModule,
+    TrackingModule,
   
   ],
   controllers: [AppController],

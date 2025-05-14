@@ -56,8 +56,37 @@ export class AuthService {
     return user;
   }
 
+  async validateAgentUser(email: string, password: string): Promise<any> {
+    // First validate the user credentials
+    const user = await this.validateUser(email, password);
+    
+    // Check if the user has Agent role
+    if (user.role !== Role.AGENT) {
+      throw new UnauthorizedException('Access denied. Agent privileges required.');
+    }
+    
+    return user;
+  }
+
+  async validateCustomerUser(email: string, password: string): Promise<any> {
+    // First validate the user credentials
+    const user = await this.validateUser(email, password);
+    
+    // Check if the user has Customer role
+    if (user.role !== Role.USER) {
+      throw new UnauthorizedException('Access denied. Customer privileges required.');
+    }
+    
+    return user;
+  }
+
   async login(user: any) {
-    const payload = { email: user.email, role: user.role, name: user.name };
+    const payload = { 
+      email: user.email, 
+      role: user.role, 
+      name: user.name, 
+      user_id: user.user_id // Add user_id here
+    };
     const accessToken = this.jwtService.sign(payload, { expiresIn: '30m' });
     const refreshToken = await this.generateRefreshToken(user);
 
@@ -117,6 +146,7 @@ export class AuthService {
           email: payload.email,
           role: payload.role,
           name: storedToken.user.name,
+          user_id: storedToken.user_id, // Add user_id here
         },
         { expiresIn: '30m' },
       );

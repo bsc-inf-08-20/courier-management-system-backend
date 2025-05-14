@@ -14,12 +14,11 @@ import { Vehicle } from 'src/entities/Vehicle.entity';
 import { Role } from 'src/enum/role.enum';
 import { CreatePacketDto } from 'src/dto/create-packet.dto';
 
-
-
 @Injectable()
 export class PacketsService {
   assignToAgent: any;
   getPacketStatus: any;
+  trackPacket: any;
   constructor(
     @InjectRepository(Packet)
     private readonly packetRepository: Repository<Packet>,
@@ -57,7 +56,6 @@ export class PacketsService {
   async createPacket(packetData: CreatePacketDto): Promise<Packet> {
     // Convert weight to number
     const weight = parseFloat(packetData.weight);
-    
     // Create packet with exact data (no defaults)
     const packet = this.packetRepository.create({
       ...packetData,
@@ -66,7 +64,7 @@ export class PacketsService {
     });
 
     return this.packetRepository.save(packet);
-}
+  }
 
   // Fetch all packets from DB
   async getAllPackets(): Promise<Packet[]> {
@@ -88,7 +86,6 @@ export class PacketsService {
     packet.confirmed_by_origin = true;
     return this.packetRepository.save(packet);
   }
-
 
   // get packets based on the city of the admin (origin and destination<after confirmed>)
   async getPacketsForAdmin(adminId: number): Promise<Packet[]> {
@@ -140,7 +137,6 @@ export class PacketsService {
       packet.weight = weight;
     }
     packet.status = 'collected';
-    
     packet.collected_at = new Date();
 
     return this.packetRepository.save(packet);
@@ -355,7 +351,7 @@ export class PacketsService {
         'pickup',
         'pickup.customer',
         'assigned_vehicle', // This gets the vehicle
-        'assigned_vehicle.assigned_driver'
+        'assigned_vehicle.assigned_driver',
       ],
       order: {
         dispatched_at: 'DESC',
@@ -363,9 +359,13 @@ export class PacketsService {
     });
   }
 
-  //Dealing with dispatching 
+  //Dealing with dispatching
 
-  async assignPacketToVehicle(packetId: number, vehicleId: number, admin: User): Promise<Packet> {
+  async assignPacketToVehicle(
+    packetId: number,
+    vehicleId: number,
+    admin: User,
+  ): Promise<Packet> {
     if (admin.role !== Role.ADMIN) {
       throw new ForbiddenException('Only admins can assign packets');
     }
@@ -373,17 +373,27 @@ export class PacketsService {
     const packet = await this.packetRepository.findOne({
       where: { id: packetId, status: 'at_origin_hub' },
     });
-    if (!packet) throw new NotFoundException('Packet not found or not ready for assignment');
+    if (!packet)
+      throw new NotFoundException(
+        'Packet not found or not ready for assignment',
+      );
 
     const vehicle = await this.vehicleRepository.findOne({
       where: { id: vehicleId, is_active: true, is_in_maintenance: false },
       relations: ['assigned_packets'],
     });
-    if (!vehicle) throw new NotFoundException('Vehicle not found or unavailable');
+    if (!vehicle)
+      throw new NotFoundException('Vehicle not found or unavailable');
 
     // Extract destination city from packet's destination_address (assuming format includes city)
-    const packetDestinationCity = packet.destination_address.split(',').pop()?.trim();
-    if (vehicle.destination_city && vehicle.destination_city !== packetDestinationCity) {
+    const packetDestinationCity = packet.destination_address
+      .split(',')
+      .pop()
+      ?.trim();
+    if (
+      vehicle.destination_city &&
+      vehicle.destination_city !== packetDestinationCity
+    ) {
       throw new BadRequestException(
         `Vehicle is assigned to ${vehicle.destination_city}, but packet is going to ${packetDestinationCity}`,
       );
@@ -408,7 +418,11 @@ export class PacketsService {
     return this.packetRepository.save(packet);
   }
 
-  async assignMultiplePacketsToVehicle(packetIds: number[], vehicleId: number, admin: User): Promise<Packet[]> {
+  async assignMultiplePacketsToVehicle(
+    packetIds: number[],
+    vehicleId: number,
+    admin: User,
+  ): Promise<Packet[]> {
     if (admin.role !== Role.ADMIN) {
       throw new ForbiddenException('Only admins can assign packets');
     }
@@ -417,23 +431,33 @@ export class PacketsService {
       where: { id: In(packetIds), status: 'at_origin_hub' },
     });
     if (packets.length !== packetIds.length) {
-      throw new NotFoundException('One or more packets not found or not ready for assignment');
+      throw new NotFoundException(
+        'One or more packets not found or not ready for assignment',
+      );
     }
 
     const vehicle = await this.vehicleRepository.findOne({
       where: { id: vehicleId, is_active: true, is_in_maintenance: false },
       relations: ['assigned_packets'],
     });
-    if (!vehicle) throw new NotFoundException('Vehicle not found or unavailable');
+    if (!vehicle)
+      throw new NotFoundException('Vehicle not found or unavailable');
 
-    const packetDestinationCities = packets.map((p) => p.destination_address.split(',').pop()?.trim());
+    const packetDestinationCities = packets.map((p) =>
+      p.destination_address.split(',').pop()?.trim(),
+    );
     const uniqueDestinations = [...new Set(packetDestinationCities)];
     if (uniqueDestinations.length > 1) {
-      throw new BadRequestException('All packets must have the same destination city');
+      throw new BadRequestException(
+        'All packets must have the same destination city',
+      );
     }
 
     const packetDestinationCity = uniqueDestinations[0];
-    if (vehicle.destination_city && vehicle.destination_city !== packetDestinationCity) {
+    if (
+      vehicle.destination_city &&
+      vehicle.destination_city !== packetDestinationCity
+    ) {
       throw new BadRequestException(
         `Vehicle is assigned to ${vehicle.destination_city}, but packets are going to ${packetDestinationCity}`,
       );
@@ -481,9 +505,12 @@ export class PacketsService {
       where: { id: vehicleId, is_active: true, is_in_maintenance: false },
       relations: ['assigned_packets'],
     });
-    if (!vehicle) throw new NotFoundException('Vehicle not found or unavailable');
+    if (!vehicle)
+      throw new NotFoundException('Vehicle not found or unavailable');
     if (!vehicle.assigned_packets || vehicle.assigned_packets.length === 0) {
-      throw new BadRequestException('Vehicle has no assigned packets to dispatch');
+      throw new BadRequestException(
+        'Vehicle has no assigned packets to dispatch',
+      );
     }
 
     vehicle.assigned_packets.forEach((packet) => {
@@ -506,18 +533,17 @@ export class PacketsService {
         status: 'at_origin_hub',
         origin_address: Like(`%${city}%`),
       },
-      relations: [
-        'pickup',
-        'pickup.customer',
-        'assigned_vehicle',
-      ],
+      relations: ['pickup', 'pickup.customer', 'assigned_vehicle'],
       order: {
         origin_hub_confirmed_at: 'DESC',
       },
     });
   }
 
-  async unassignPacketFromVehicle(packetId: number, admin: User): Promise<Packet> {
+  async unassignPacketFromVehicle(
+    packetId: number,
+    admin: User,
+  ): Promise<Packet> {
     if (admin.role !== Role.ADMIN) {
       throw new ForbiddenException('Only admins can unassign packets');
     }
@@ -526,7 +552,10 @@ export class PacketsService {
       where: { id: packetId, status: 'at_origin_hub' },
       relations: ['assigned_vehicle'],
     });
-    if (!packet) throw new NotFoundException('Packet not found or not in a state to unassign');
+    if (!packet)
+      throw new NotFoundException(
+        'Packet not found or not in a state to unassign',
+      );
 
     if (!packet.assigned_vehicle) {
       throw new BadRequestException('Packet is not assigned to any vehicle');
@@ -542,7 +571,9 @@ export class PacketsService {
     vehicle.current_load -= packet.weight;
 
     // If no packets remain, clear the destination city
-    const remainingPackets = vehicle.assigned_packets.filter((p) => p.id !== packetId);
+    const remainingPackets = vehicle.assigned_packets.filter(
+      (p) => p.id !== packetId,
+    );
     if (remainingPackets.length === 0) {
       vehicle.destination_city = null;
     }
@@ -554,6 +585,7 @@ export class PacketsService {
     return this.packetRepository.save(packet);
   }
 
+  //HANDLING RECEIVING PACKET
   // Fetch packets at the destination hub (ready for delivery agent assignment)
   async getPacketsAtDestinationHub(city: string): Promise<Packet[]> {
     return this.packetRepository.find({
@@ -578,7 +610,11 @@ export class PacketsService {
   }
 
   // Assign a delivery agent to a packet
-  async assignDeliveryAgent(packetId: number, agentId: number, admin: User): Promise<Packet> {
+  async assignDeliveryAgent(
+    packetId: number,
+    agentId: number,
+    admin: User,
+  ): Promise<Packet> {
     if (admin.role !== Role.ADMIN) {
       throw new ForbiddenException('Only admins can assign delivery agents');
     }
@@ -647,33 +683,87 @@ export class PacketsService {
     return this.packetRepository.save(packet);
   }
 
+  // fetches all packets assigned to a specific agent (either as pickup or delivery agent)
+  async findByAgent(agentId: number): Promise<Packet[]> {
+    return this.packetRepository.find({
+      where: [
+        { assigned_pickup_agent: { user_id: agentId } },
+        { assigned_delivery_agent: { user_id: agentId } },
+      ],
+      relations: [
+        'assigned_pickup_agent',
+        'assigned_delivery_agent',
+        'assigned_vehicle',
+        'pickup',
+      ],
+      order: {
+        status: 'ASC', // Optional: order by status
+        collected_at: 'DESC', // Optional: newest first
+      },
+    });
+  }
+
+  //get the packets coordinates
+  async getPacketOriginCoordinates(packetId: number) {
+    console.log('Searching for packet ID:', packetId);
+    const packet = await this.packetRepository.findOne({
+      where: { id: packetId },
+    });
   
-  // ✅ NEW: Track the movement of a parcel by returning its status and timestamps
-    async trackPacket(trackingId: string): Promise<{
-      status: string;
-      collected_at?: Date;
-      origin_hub_confirmed_at?: Date;
-      dispatched_at?: Date;
-      destination_hub_confirmed_at?: Date;
-      out_for_delivery_at?: Date;
-      delivered_at?: Date;
-      received_at?: Date;
-    }> {
-      const packet = await this.packetRepository.findOneBy({trackingId});
-      if (!packet) {
-        throw new NotFoundException('Packet not found');
-      }
+    console.log('Found packet:', packet);
   
-      // Return all the key tracking info
-      return {
-        status: packet.status,
-        collected_at: packet.collected_at,
-        origin_hub_confirmed_at: packet.origin_hub_confirmed_at,
-        dispatched_at: packet.dispatched_at,
-        destination_hub_confirmed_at: packet.destination_hub_confirmed_at,
-        out_for_delivery_at: packet.out_for_delivery_at,
-        delivered_at: packet.delivered_at,
-        received_at: packet.received_at,
-      };
+    if (!packet) throw new NotFoundException('Packet not found');
+    
+    if (!packet.origin_coordinates) {
+      console.warn('Packet found but origin_coordinates is null/undefined');
     }
+    
+    return packet.origin_coordinates;
+  }
+
+  async getPacketDestinationCoordinates(packetId: number) {
+    const packet = await this.packetRepository.findOne({
+      where: { id: packetId },
+      select: ['destination_coordinates'],
+    });
+
+    if (!packet) throw new NotFoundException('Packet not found');
+    return packet.destination_coordinates;
+  }
+
+  // get assigned packets for agent for pickup
+  async getAssignedPacketsForAgent(agentId: number): Promise<Packet[]> {
+    return this.packetRepository.createQueryBuilder('packet')
+      .leftJoinAndSelect('packet.assigned_pickup_agent', 'agent')
+      .where('agent.user_id = :agentId', { agentId })
+      .andWhere('packet.status = :status', { status: 'pending' }) // Explicitly check for 'pending'
+      .select([
+        'packet.id',
+        'packet.description',
+        'packet.origin_coordinates',
+        'packet.status',
+        'agent.user_id'
+      ])
+      .getMany();
+  }
+
+  // get assigned packets for agent for delivery
+  async getAssignedPacketsForDeliveryAgent(agentId: number): Promise<Packet[]> {
+     return this.packetRepository.createQueryBuilder('packet')
+      .leftJoinAndSelect('packet.assigned_delivery_agent', 'agent')
+      .where('agent.user_id = :agentId', { agentId })
+      .andWhere('packet.status = :status', { status: 'out_for_delivery' }) // Explicitly check for 'out_for_delivery'
+      .select([
+        'packet.id',
+        'packet.description',
+        'packet.destination_coordinates',
+        'packet.status',
+        'agent.user_id'
+      ])
+      .getMany();
+  }
+
+  async updatePacketStatus(packetId: number, status: string) {
+    await this.packetRepository.update(packetId, { status });
+  }
 }
