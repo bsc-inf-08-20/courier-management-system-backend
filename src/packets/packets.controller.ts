@@ -345,4 +345,10 @@ export class PacketsController {
     return this.packetsService.getAssignedPacketsForDeliveryAgent(agentId);
   }
 
+  // paid packets
+  @Patch(':id/mark-as-paid')
+  @UseGuards(JwtAuthGuard)
+  async markAsPaid(@Param('id') id: string): Promise<Packet> {
+    return this.packetsService.markAsPaid(parseInt(id));
+  }
 }

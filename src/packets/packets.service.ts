@@ -745,4 +745,22 @@ export class PacketsService {
   async updatePacketStatus(packetId: number, status: string) {
     await this.packetRepository.update(packetId, { status });
   }
+
+  // Mark a packet as paid
+  async markAsPaid(packetId: number): Promise<Packet> {
+    const packet = await this.packetRepository.findOne({
+      where: { id: packetId }
+    });
+
+    if (!packet) {
+      throw new NotFoundException('Packet not found');
+    }
+
+    if (packet.is_paid) {
+      throw new ConflictException('Packet is already marked as paid');
+    }
+
+    packet.is_paid = true;
+    return this.packetRepository.save(packet);
+  }
 }

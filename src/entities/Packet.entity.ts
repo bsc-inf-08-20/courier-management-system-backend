@@ -131,4 +131,7 @@ pickup_window_end: Date;@Column({ type: 'timestamp', nullable: true })
 
   @Column({ nullable: true })
   hub_confirmed_at: Date;
+
+  @Column({ default: false })
+  is_paid: boolean;
 }
