@@ -209,15 +209,20 @@ export class PacketsService {
     return this.packetRepository.save(packet);
   }
 
-  async markAsDelivered(packetId: number): Promise<Packet> {
+  async markAsDelivered(packetId: number, signatureBase64: string): Promise<Packet> {
     const packet = await this.packetRepository.findOneBy({ id: packetId });
-    if (!packet) throw new NotFoundException('Packet not found');
+    if (!packet) {
+      throw new NotFoundException('Packet not found');
+    }
+    
     if (packet.status !== 'out_for_delivery') {
       throw new ConflictException('Packet must be out for delivery first');
     }
 
     packet.status = 'delivered';
     packet.delivered_at = new Date();
+    packet.signature_base64 = signatureBase64; // Save the signature
+
     return this.packetRepository.save(packet);
   }
 
@@ -762,5 +767,37 @@ export class PacketsService {
 
     packet.is_paid = true;
     return this.packetRepository.save(packet);
+  }
+
+  async getDeliveryAgentPackets(agentId: number): Promise<any[]> {
+    const packets = await this.packetRepository.find({
+      where: {
+        assigned_delivery_agent: { user_id: agentId },
+        status: 'out_for_delivery',
+        delivery_type: 'delivery'
+      },
+      select: [
+        'id',
+        'destination_coordinates',
+        'category',
+        'created_at',
+        'receiver',
+      ],
+      relations: ['assigned_delivery_agent']
+    });
+
+    // Transform the data to return only needed fields
+    return packets.map(packet => ({
+      id: packet.id,
+      destination_coordinates: packet.destination_coordinates,
+      category: packet.category,
+      sent_date: packet.created_at,
+      customer: {
+        name: packet.receiver.name,
+        phone_number: packet.receiver.phone_number
+      },
+      status: packet.status,
+      signature_base64: packet.signature_base64 || null // Include signature if available
+    }));
   }
 }

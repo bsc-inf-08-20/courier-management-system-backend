@@ -5,6 +5,7 @@ import {
   OneToOne,
   JoinColumn,
   ManyToOne,
+  CreateDateColumn,
 } from 'typeorm';
 import { PickupRequest } from './PickupRequest.entity';
 import { User } from './User.entity';
@@ -108,6 +109,9 @@ pickup_window_end: Date;@Column({ type: 'timestamp', nullable: true })
   @Column({ default: false }) // Only allow Mzuzu to see confirmed packets
   confirmed_by_origin: boolean;
 
+  @CreateDateColumn()
+  created_at: Date;
+
   @Column({ nullable: true })
   collected_at: Date;
 
@@ -134,4 +138,9 @@ pickup_window_end: Date;@Column({ type: 'timestamp', nullable: true })
 
   @Column({ default: false })
   is_paid: boolean;
+
+  @Column({ type: 'text', nullable: true })
+signature_base64: string;
+
+  
 }

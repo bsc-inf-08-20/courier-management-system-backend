@@ -198,11 +198,15 @@ export class PacketsController {
     return this.packetsService.markOutForDelivery(parseInt(id));
   }
 
-  @Patch(':id/delivered')
+  @Patch(':id/mark-delivered')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.AGENT)
-  async markAsDelivered(@Param('id') id: string, @Request() req) {
-    return this.packetsService.markAsDelivered(parseInt(id));
+  async markAsDelivered(
+    @Param('id') id: string,
+    @Body('signature_base64') signatureBase64: string,
+    @Request() req
+  ) {
+    return this.packetsService.markAsDelivered(parseInt(id), signatureBase64);
   }
 
   @Patch(':id/received')
@@ -351,4 +355,17 @@ export class PacketsController {
   async markAsPaid(@Param('id') id: string): Promise<Packet> {
     return this.packetsService.markAsPaid(parseInt(id));
   }
+
+  // get packets for delivery agent
+  @Get('delivery-agent/packets')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.AGENT)
+  async getDeliveryAgentPackets(@Request() req) {
+    return this.packetsService.getDeliveryAgentPackets(req.user.user_id);
+  }
+
+  // get packets that have been delivered
+  // needs to be implemented
+
+  
 }
