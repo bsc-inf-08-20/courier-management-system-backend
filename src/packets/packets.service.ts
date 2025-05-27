@@ -13,6 +13,7 @@ import { User } from 'src/entities/User.entity';
 import { Vehicle } from 'src/entities/Vehicle.entity';
 import { Role } from 'src/enum/role.enum';
 import { CreatePacketDto } from 'src/dto/create-packet.dto';
+import { PickupRequest } from 'src/entities/PickupRequest.entity';
 
 @Injectable()
 export class PacketsService {
@@ -23,6 +24,8 @@ export class PacketsService {
     private readonly userRepository: Repository<User>,
     @InjectRepository(Vehicle)
     private readonly vehicleRepository: Repository<Vehicle>,
+    @InjectRepository(PickupRequest)
+    private readonly pickupRequestRepository: Repository<PickupRequest>,
   ) {}
 
   //create packet from admin's panel
@@ -209,15 +212,23 @@ export class PacketsService {
     return this.packetRepository.save(packet);
   }
 
-  async markAsDelivered(packetId: number): Promise<Packet> {
+  async markAsDelivered(
+    packetId: number,
+    signatureBase64: string,
+  ): Promise<Packet> {
     const packet = await this.packetRepository.findOneBy({ id: packetId });
-    if (!packet) throw new NotFoundException('Packet not found');
+    if (!packet) {
+      throw new NotFoundException('Packet not found');
+    }
+
     if (packet.status !== 'out_for_delivery') {
       throw new ConflictException('Packet must be out for delivery first');
     }
 
     packet.status = 'delivered';
     packet.delivered_at = new Date();
+    packet.signature_base64 = signatureBase64; // Save the signature
+
     return this.packetRepository.save(packet);
   }
 
@@ -688,15 +699,15 @@ export class PacketsService {
     const packet = await this.packetRepository.findOne({
       where: { id: packetId },
     });
-  
+
     console.log('Found packet:', packet);
-  
+
     if (!packet) throw new NotFoundException('Packet not found');
-    
+
     if (!packet.origin_coordinates) {
       console.warn('Packet found but origin_coordinates is null/undefined');
     }
-    
+
     return packet.origin_coordinates;
   }
 
@@ -712,7 +723,8 @@ export class PacketsService {
 
   // get assigned packets for agent for pickup
   async getAssignedPacketsForAgent(agentId: number): Promise<Packet[]> {
-    return this.packetRepository.createQueryBuilder('packet')
+    return this.packetRepository
+      .createQueryBuilder('packet')
       .leftJoinAndSelect('packet.assigned_pickup_agent', 'agent')
       .where('agent.user_id = :agentId', { agentId })
       .andWhere('packet.status = :status', { status: 'pending' }) // Explicitly check for 'pending'
@@ -721,14 +733,15 @@ export class PacketsService {
         'packet.description',
         'packet.origin_coordinates',
         'packet.status',
-        'agent.user_id'
+        'agent.user_id',
       ])
       .getMany();
   }
 
   // get assigned packets for agent for delivery
   async getAssignedPacketsForDeliveryAgent(agentId: number): Promise<Packet[]> {
-     return this.packetRepository.createQueryBuilder('packet')
+    return this.packetRepository
+      .createQueryBuilder('packet')
       .leftJoinAndSelect('packet.assigned_delivery_agent', 'agent')
       .where('agent.user_id = :agentId', { agentId })
       .andWhere('packet.status = :status', { status: 'out_for_delivery' }) // Explicitly check for 'out_for_delivery'
@@ -737,12 +750,91 @@ export class PacketsService {
         'packet.description',
         'packet.destination_coordinates',
         'packet.status',
-        'agent.user_id'
+        'agent.user_id',
       ])
       .getMany();
   }
 
   async updatePacketStatus(packetId: number, status: string) {
     await this.packetRepository.update(packetId, { status });
+  }
+
+  // Mark a packet as paid
+  async markAsPaid(packetId: number): Promise<Packet> {
+    const packet = await this.packetRepository.findOne({
+      where: { id: packetId },
+    });
+
+    if (!packet) {
+      throw new NotFoundException('Packet not found');
+    }
+
+    if (packet.is_paid) {
+      throw new ConflictException('Packet is already marked as paid');
+    }
+
+    packet.is_paid = true;
+    return this.packetRepository.save(packet);
+  }
+
+  async getDeliveryAgentPackets(agentId: number): Promise<any[]> {
+    const packets = await this.packetRepository.find({
+      where: {
+        assigned_delivery_agent: { user_id: agentId },
+        status: 'out_for_delivery',
+        delivery_type: 'delivery',
+      },
+      select: [
+        'id',
+        'destination_coordinates',
+        'category',
+        'created_at',
+        'receiver',
+      ],
+      relations: ['assigned_delivery_agent'],
+    });
+
+    // Transform the data to return only needed fields
+    return packets.map((packet) => ({
+      id: packet.id,
+      destination_coordinates: packet.destination_coordinates,
+      category: packet.category,
+      sent_date: packet.created_at,
+      customer: {
+        name: packet.receiver.name,
+        phone_number: packet.receiver.phone_number,
+      },
+      status: packet.status,
+      signature_base64: packet.signature_base64 || null, // Include signature if available
+    }));
+  }
+
+  // Add this method to PacketsService
+ async getPacketById(id: number): Promise<Packet> {
+    const packet = await this.packetRepository.findOne({
+      where: { id },
+      relations: [
+        'assigned_delivery_agent', // Make sure this relation is loaded
+      ],
+    });
+
+    if (!packet) {
+      throw new NotFoundException(`Packet with ID ${id} not found`);
+    }
+
+    return packet;
+  }
+
+  async getPickupRequestById(id: number): Promise<PickupRequest> {
+    const pickupRequest = await this.pickupRequestRepository.findOne({
+      where: { id },
+      relations: ['assigned_agent', 'packet', 'customer'],
+    });
+
+    if (!pickupRequest) {
+      throw new NotFoundException(`Pickup request with ID ${id} not found`);
+    }
+
+    return pickupRequest;
   }
 }

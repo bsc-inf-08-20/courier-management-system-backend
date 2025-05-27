@@ -15,6 +15,7 @@ import { VehiclesModule } from './vehicles/vehicles.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { RefreshToken } from './entities/RefreshToken.entity';
 import { TrackingModule } from './tracking/tracking.module';
+import { EmailModule } from './email/email.module';
 
 @Module({
   imports: [
@@ -52,6 +53,7 @@ import { TrackingModule } from './tracking/tracking.module';
     PacketsModule,
     VehiclesModule,
     TrackingModule,
+    EmailModule,
   ],
   controllers: [AppController],
   providers: [AppService],
