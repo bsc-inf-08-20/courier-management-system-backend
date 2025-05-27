@@ -5,6 +5,7 @@ import {
   Get,
   HttpException,
   HttpStatus,
+  NotFoundException,
   Param,
   ParseIntPipe,
   Patch,
@@ -23,10 +24,13 @@ import { UpdatePacketWeightDto } from 'src/dto/update-packet-weight.dto';
 import { Packet } from 'src/entities/Packet.entity';
 import { CreatePacketDto } from 'src/dto/create-packet.dto';
 import { Vehicle } from 'src/entities/Vehicle.entity';
+import { EmailService } from '../email/email.service';
 
 @Controller('packets')
 export class PacketsController {
-  constructor(private readonly packetsService: PacketsService) {}
+  constructor(private readonly packetsService: PacketsService,
+    private readonly emailService: EmailService, 
+  ) {}
 
   // Post a packet from admin's panel
   @Post()
@@ -366,6 +370,82 @@ export class PacketsController {
 
   // get packets that have been delivered
   // needs to be implemented
+
+  @Post('notifications/delivery-confirmation')
+  @UseGuards(JwtAuthGuard)
+  async sendDeliveryConfirmation(@Body('packetId') packetId: number) {
+    const packet = await this.packetsService.getPacketById(packetId);
+    if (!packet) {
+      throw new NotFoundException('Packet not found');
+    }
+
+    if (packet.status !== 'delivered') {
+      throw new BadRequestException('Packet is not delivered yet');
+    }
+
+    await this.emailService.sendDeliveryConfirmationToSender(
+      packet.sender.email,
+      {
+        trackingId: packet.id.toString(),
+        recipientName: packet.receiver.name,
+        deliveryLocation: packet.destination_address,
+        deliveryTime: packet.delivered_at,
+      }
+    );
+
+    return { message: 'Delivery confirmation email sent successfully' };
+  }
+
+  @Post('notifications/pickup-assignment')
+  @UseGuards(JwtAuthGuard)
+  async sendPickupAssignment(@Body('pickupRequestId') pickupRequestId: number) {
+    const pickup = await this.packetsService.getPickupRequestById(pickupRequestId);
+    if (!pickup) {
+      throw new NotFoundException('Pickup request not found');
+    }
+
+    if (!pickup.assigned_agent) {
+      throw new BadRequestException('No agent assigned to this pickup');
+    }
+
+    await this.emailService.sendPickupAssignmentNotification(
+      pickup.assigned_agent.email,
+      {
+        trackingId: pickup.packet.id.toString(),
+        pickupLocation: pickup.pickup_address,
+        senderName: pickup.customer.name,
+        senderContact: pickup.customer.phone_number,
+      }
+    );
+
+    return { message: 'Pickup assignment notification sent successfully' };
+  }
+
+  // Add this new endpoint for delivery assignment notification
+  @Post('notifications/delivery-assignment')
+  @UseGuards(JwtAuthGuard)
+  async sendDeliveryAssignment(@Body('packetId') packetId: number) {
+    const packet = await this.packetsService.getPacketById(packetId);
+    if (!packet) {
+      throw new NotFoundException('Packet not found');
+    }
+
+    if (!packet.assigned_delivery_agent) {
+      throw new BadRequestException('No delivery agent assigned to this packet');
+    }
+
+    await this.emailService.sendDeliveryAssignmentNotification(
+      packet.assigned_delivery_agent.email,
+      {
+        trackingId: packet.id.toString(),
+        deliveryLocation: packet.destination_address,
+        recipientName: packet.receiver.name,
+        recipientContact: packet.receiver.phone_number,
+      }
+    );
+
+    return { message: 'Delivery assignment notification sent successfully' };
+  }
 
   
 }
