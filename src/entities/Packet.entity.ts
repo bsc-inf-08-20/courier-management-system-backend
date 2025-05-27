@@ -5,6 +5,7 @@ import {
   OneToOne,
   JoinColumn,
   ManyToOne,
+  CreateDateColumn,
   BeforeInsert,
 } from 'typeorm';
 import { PickupRequest } from './PickupRequest.entity';
@@ -17,14 +18,14 @@ export class Packet {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ unique: true })
+   @Column({ unique: true })
   trackingId: string; // 🆕 Added for tracking
   
 
   
   @BeforeInsert() // ✅ Lifecycle hook to auto-generate tracking ID
   generateTrackingId() {
-    this.trackingId = `${uuidv4().slice(0, 8).toUpperCase()}`;
+    this.trackingId = `TRK-${uuidv4().slice(0, 8).toUpperCase()}`;
   }
 
   @Column()
@@ -120,6 +121,9 @@ pickup_window_end: Date;@Column({ type: 'timestamp', nullable: true })
   @Column({ default: false }) // Only allow Mzuzu to see confirmed packets
   confirmed_by_origin: boolean;
 
+  @CreateDateColumn()
+  created_at: Date;
+
   @Column({ nullable: true })
   collected_at: Date;
 
@@ -143,4 +147,12 @@ pickup_window_end: Date;@Column({ type: 'timestamp', nullable: true })
 
   @Column({ nullable: true })
   hub_confirmed_at: Date;
+
+  @Column({ default: false })
+  is_paid: boolean;
+
+  @Column({ type: 'text', nullable: true })
+signature_base64: string;
+
+  
 }

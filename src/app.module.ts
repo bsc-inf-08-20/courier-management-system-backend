@@ -19,9 +19,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { RefreshToken } from './entities/RefreshToken.entity';
 import { MessagesModule } from './message/message.module';
 import { MessagesGateway } from './message_gateway/message_gateway.gateway';
-import { AssignModule } from './assign/assign.module';
-import { MailModule } from './mails/mails.module';
 import { TrackingModule } from './tracking/tracking.module';
+import { EmailModule } from './email/email.module';
 
 @Module({
   imports: [
@@ -52,9 +51,8 @@ import { TrackingModule } from './tracking/tracking.module';
     PacketsModule,
     VehiclesModule,
     MessagesModule,
-    AssignModule,
-    MailModule,
     TrackingModule,
+    EmailModule,
   
   ],
   controllers: [AppController],
