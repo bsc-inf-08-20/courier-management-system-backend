@@ -53,7 +53,6 @@ import { EmailModule } from './email/email.module';
     MessagesModule,
     TrackingModule,
     EmailModule,
-  
   ],
   controllers: [AppController],
   providers: [AppService, MessagesGateway],

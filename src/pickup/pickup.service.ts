@@ -28,9 +28,9 @@ export class PickupService {
     const customer = await this.userRepository.findOne({
       where: { user_id: customerId },
     });
-  
+
     if (!customer) throw new Error('Customer not found');
-  
+
     const packet = this.packetRepository.create({
       description: pickupData.packet_description,
       weight: pickupData.packet_weight,
@@ -44,29 +44,28 @@ export class PickupService {
       sender: {
         name: pickupData.sender.name,
         email: pickupData.sender.email,
-        phone_number: pickupData.sender.phone_number
+        phone_number: pickupData.sender.phone_number,
       },
       receiver: {
         name: pickupData.receiver.name,
         email: pickupData.receiver.email,
-        phone_number: pickupData.receiver.phone_number
+        phone_number: pickupData.receiver.phone_number,
       },
       origin_coordinates: {
         lat: pickupData.origin_coordinates.lat,
-        lng: pickupData.origin_coordinates.lng
+        lng: pickupData.origin_coordinates.lng,
       },
       destination_coordinates: {
         lat: pickupData.destination_coordinates.lat,
-        lng: pickupData.destination_coordinates.lng
+        lng: pickupData.destination_coordinates.lng,
       },
 
       pickup_window_start: new Date(pickupData.pickup_window.start),
-  pickup_window_end: new Date(pickupData.pickup_window.end)
+      pickup_window_end: new Date(pickupData.pickup_window.end),
     });
-  
+
     const savedPacket = await this.packetRepository.save(packet);
 
-    //  Create the pickup request and link the packet
     const pickupRequest = this.pickupRepository.create({
       customer,
       pickup_address: pickupData.pickup_address,
@@ -74,7 +73,7 @@ export class PickupService {
       packet: savedPacket,
       status: 'pending',
     });
-  
+
     return this.pickupRepository.save(pickupRequest);
   }
 
@@ -112,7 +111,7 @@ export class PickupService {
         status: 'assigned',
         assigned_agent: { user_id: agentId },
         packet: {
-          status: Not('collected'), 
+          status: Not('collected'),
         },
       },
       relations: ['customer', 'assigned_agent', 'packet'],
@@ -153,14 +152,14 @@ export class PickupService {
     if (agent.city !== admin.city) {
       throw new ForbiddenException('You can only assign agents from your city');
     }
-  
+
     // Assign agent to the PickupRequest
     pickupRequest.assigned_agent = agent;
     pickupRequest.status = 'assigned';
-  
+
     // Assign agent to the Packet as assigned_driver
     pickupRequest.packet.assigned_pickup_agent = agent;
-  
+
     // Save the PickupRequest (this will cascade to the Packet due to eager: true and cascade: true)
     return this.pickupRepository.save(pickupRequest);
   }
