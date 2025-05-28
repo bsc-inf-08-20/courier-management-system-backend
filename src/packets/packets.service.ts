@@ -232,6 +232,23 @@ export class PacketsService {
     return this.packetRepository.save(packet);
   }
 
+  // marked as delivered when picked
+  async picked(
+    packetId: number,
+    signatureBase64: string,
+  ): Promise<Packet> {
+    const packet = await this.packetRepository.findOneBy({ id: packetId });
+    if (!packet) {
+      throw new NotFoundException('Packet not found');
+    }
+
+    packet.status = 'delivered';
+    packet.delivered_at = new Date();
+    packet.signature_base64 = signatureBase64; // Save the signature
+
+    return this.packetRepository.save(packet);
+  }
+
   async confirmReceiverReceived(packetId: number): Promise<Packet> {
     const packet = await this.packetRepository.findOneBy({ id: packetId });
     if (!packet) throw new NotFoundException('Packet not found');
@@ -240,7 +257,6 @@ export class PacketsService {
     }
 
     packet.status = 'received';
-    packet.received_at = new Date();
     return this.packetRepository.save(packet);
   }
 
@@ -594,6 +610,17 @@ export class PacketsService {
         status: 'out_for_delivery',
         destination_address: Like(`%${city}%`),
         assigned_delivery_agent: { city },
+      },
+      relations: ['assigned_delivery_agent'],
+    });
+  }
+
+  // Fetch packets delivered (already delivered)
+  async getDeliveredPackets(city: string): Promise<Packet[]> {
+    return this.packetRepository.find({
+      where: {
+        status: 'delivered',
+        destination_address: Like(`%${city}%`),
       },
       relations: ['assigned_delivery_agent'],
     });

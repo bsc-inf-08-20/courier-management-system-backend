@@ -213,6 +213,18 @@ export class PacketsController {
     return this.packetsService.markAsDelivered(parseInt(id), signatureBase64);
   }
 
+  // this does also mark the packet as delivered
+  @Patch(':id/picked')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  async picked(
+    @Param('id') id: string,
+    @Body('signature_base64') signatureBase64: string,
+    @Request() req
+  ) {
+    return this.packetsService.picked(parseInt(id), signatureBase64);
+  }
+
   @Patch(':id/received')
   @UseGuards(JwtAuthGuard)
   async confirmReceiverReceived(@Param('id') id: string) {
@@ -306,6 +318,14 @@ export class PacketsController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Get('delivered') 
+  async getDeliveredPackets(
+    @Query('city') city: string,
+  ): Promise<Packet[]> {
+    return this.packetsService.getDeliveredPackets(city);
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Post('assign-delivery-agent')
   async assignDeliveryAgent(
     @Body('packetId') packetId: number,
@@ -371,6 +391,7 @@ export class PacketsController {
   // get packets that have been delivered
   // needs to be implemented
 
+  //agent delivery packet to customer - email notification
   @Post('notifications/delivery-confirmation')
   @UseGuards(JwtAuthGuard)
   async sendDeliveryConfirmation(@Body('packetId') packetId: number) {
@@ -396,6 +417,33 @@ export class PacketsController {
     return { message: 'Delivery confirmation email sent successfully' };
   }
 
+  // customer pickup email notification
+  @Post('notifications/pickup-confirmation')
+  @UseGuards(JwtAuthGuard)
+  async sendPickupConfirmation(@Body('packetId') packetId: number) {
+    const packet = await this.packetsService.getPacketById(packetId);
+    if (!packet) {
+      throw new NotFoundException('Packet not found');
+    }
+
+    if (packet.status !== 'delivered') {
+      throw new BadRequestException('Packet is not delivered yet');
+    }
+
+    await this.emailService.sendPickupConfirmationToSender(
+      packet.sender.email,
+      {
+        trackingId: packet.id.toString(),
+        recipientName: packet.receiver.name,
+        deliveryLocation: packet.destination_address,
+        deliveryTime: packet.delivered_at,
+      }
+    );
+
+    return { message: 'Delivery confirmation email sent successfully' };
+  }
+
+  // pickup assignment email notification
   @Post('notifications/pickup-assignment')
   @UseGuards(JwtAuthGuard)
   async sendPickupAssignment(@Body('pickupRequestId') pickupRequestId: number) {
@@ -421,7 +469,7 @@ export class PacketsController {
     return { message: 'Pickup assignment notification sent successfully' };
   }
 
-  // Add this new endpoint for delivery assignment notification
+  // delivery assignment email notification
   @Post('notifications/delivery-assignment')
   @UseGuards(JwtAuthGuard)
   async sendDeliveryAssignment(@Body('packetId') packetId: number) {

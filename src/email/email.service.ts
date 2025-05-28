@@ -82,5 +82,30 @@ export class EmailService {
     });
   }
 
+  async sendPickupConfirmationToSender(
+    senderEmail: string,
+    packageDetails: {
+      trackingId: string;
+      recipientName: string;
+      deliveryLocation: string;
+      deliveryTime: Date;
+    },
+  ) {
+    await this.mailerService.sendMail({
+      to: senderEmail,
+      subject: 'Package Delivered Successfully',
+      html: `
+        <h1>Package Delivered Successfully</h1>
+        <p>Your package has been delivered successfully:</p>
+        <ul>
+          <li>Tracking ID: ${packageDetails.trackingId}</li>
+          <li>Delivered to: ${packageDetails.recipientName}</li>
+          <li>Delivery Location: ${packageDetails.deliveryLocation}</li>
+          <li>Delivery Time: ${packageDetails.deliveryTime.toLocaleString()}</li>
+        </ul>
+      `,
+    });
+  }
+
   
 }
