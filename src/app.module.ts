@@ -8,12 +8,17 @@ import { UsersModule } from './users/users.module';
 import { PickupModule } from './pickup/pickup.module';
 import { PickupRequest } from './entities/PickupRequest.entity';
 import { Packet } from './entities/Packet.entity';
+import {AgentConfirmPickup} from './entities/agent-confirm-pickup.entity';
+import { AgentModule } from './agent/agent.module';
+import { AgentConfirmPickupModule } from './agent-confirm-pickup/agent-confirm-pickup.module';
 import { PacketsModule } from './packets/packets.module';
 import { Profile } from './entities/Profile.entity';
 import { Vehicle } from './entities/Vehicle.entity';
 import { VehiclesModule } from './vehicles/vehicles.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { RefreshToken } from './entities/RefreshToken.entity';
+import { MessagesModule } from './message/message.module';
+import { MessagesGateway } from './message_gateway/message_gateway.gateway';
 import { TrackingModule } from './tracking/tracking.module';
 import { EmailModule } from './email/email.module';
 
@@ -22,7 +27,8 @@ import { EmailModule } from './email/email.module';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-    TypeOrmModule.forRootAsync({
+    
+       TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
@@ -36,26 +42,19 @@ import { EmailModule } from './email/email.module';
         entities: [User, PickupRequest, Packet, Profile, Vehicle, RefreshToken],
       }),
     }),
-    // TypeOrmModule.forRoot({
-    //   type: 'mysql',
-    //   host: 'localhost',
-    //   port: 3306,
-    //   username: 'root',
-    //   password: '',
-    //   database: 'courier_db',
-    //   // entities: [__dirname + '/entities/*.ts'], // Path to your entity files
-    //   entities: [User, PickupRequest, Packet, Profile, Vehicle, RefreshToken],
-    //   synchronize: true,
-    // }),
+    
     UsersModule,
     AuthModule,
     PickupModule,
+    AgentModule,
+    AgentConfirmPickupModule,
     PacketsModule,
     VehiclesModule,
+    MessagesModule,
     TrackingModule,
     EmailModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, MessagesGateway],
 })
 export class AppModule {}

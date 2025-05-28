@@ -76,4 +76,5 @@ export class User {
 
   @CreateDateColumn() // Automatically stores when the record is created
   created_at: Date;
+    messages: any;
 }

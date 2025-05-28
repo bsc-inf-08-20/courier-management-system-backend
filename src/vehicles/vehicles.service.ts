@@ -194,3 +194,4 @@ export class VehiclesService {
     return updatedVehicle;
   }
 }
+
