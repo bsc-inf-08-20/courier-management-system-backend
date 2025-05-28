@@ -5,6 +5,7 @@ export class CreatePacketDto {
   category: string;
   instructions?: string;
   delivery_type: 'pickup' | 'delivery';
+  origin_city: string;
   origin_address: string;
   origin_coordinates: { lat: number; lng: number };
   destination_address: string;

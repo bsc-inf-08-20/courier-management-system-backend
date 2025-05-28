@@ -68,6 +68,9 @@ export class Packet {
   delivery_type: 'pickup' | 'delivery';
 
   @Column()
+  origin_city: string;
+
+  @Column()
   origin_address: string;
 
   @Column('simple-json', { nullable: true })

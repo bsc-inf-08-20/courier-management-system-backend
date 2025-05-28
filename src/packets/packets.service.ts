@@ -36,7 +36,7 @@ export class PacketsService {
   //     weight: packetData.weight || 0,
   //     category: packetData.category || 'other',
   //     instructions: packetData.instructions || '',
-  //     origin_address: packetData.origin_address || '',
+  //     origin_city: packetData.origin_city || '',
   //     origin_coordinates: packetData.origin_coordinates || { lat: 0, lng: 0 },
   //     destination_address: packetData.destination_address || '',
   //     destination_coordinates: packetData.destination_coordinates || { lat: 0, lng: 0 },
@@ -100,7 +100,7 @@ export class PacketsService {
     return this.packetRepository.find({
       where: [
         {
-          origin_address: Like(`%${admin.city}%`),
+          origin_city: Like(`%${admin.city}%`),
           status: Not('received'), // Show all packets from their city
         },
         {
@@ -233,10 +233,7 @@ export class PacketsService {
   }
 
   // marked as delivered when picked
-  async picked(
-    packetId: number,
-    signatureBase64: string,
-  ): Promise<Packet> {
+  async picked(packetId: number, signatureBase64: string): Promise<Packet> {
     const packet = await this.packetRepository.findOneBy({ id: packetId });
     if (!packet) {
       throw new NotFoundException('Packet not found');
@@ -314,7 +311,7 @@ export class PacketsService {
   //   return this.packetRepository.find({
   //     where: {
   //       status: 'at_origin_hub',
-  //       origin_address: Like(`%${city}%`),
+  //       origin_city: Like(`%${city}%`),
   //       // confirmed_by_origin: true, // Only show confirmed packets
   //     },
   //     relations: [
@@ -333,7 +330,7 @@ export class PacketsService {
     return this.packetRepository.find({
       where: {
         status: 'in_transit',
-        origin_address: Like(`%${origin}%`),
+        origin_city: Like(`%${origin}%`),
       },
       relations: [
         'pickup',
@@ -537,7 +534,7 @@ export class PacketsService {
     return this.packetRepository.find({
       where: {
         status: 'at_origin_hub',
-        origin_address: Like(`%${city}%`),
+        origin_city: Like(`%${city}%`),
       },
       relations: ['pickup', 'pickup.customer', 'assigned_vehicle'],
       order: {
@@ -837,7 +834,7 @@ export class PacketsService {
   }
 
   // Add this method to PacketsService
- async getPacketById(id: number): Promise<Packet> {
+  async getPacketById(id: number): Promise<Packet> {
     const packet = await this.packetRepository.findOne({
       where: { id },
       relations: [

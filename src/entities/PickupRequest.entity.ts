@@ -14,6 +14,9 @@ export class PickupRequest {
   pickup_address: string;
 
   @Column()
+  pickup_city: string; // City where the pickup is requested
+
+  @Column()
   destination_address: string; 
 
   @Column({ default: 'pending' }) // 'pending', 'assigned', 'completed'
