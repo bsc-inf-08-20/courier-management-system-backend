@@ -39,6 +39,7 @@ export class PickupService {
       status: 'pending',
       delivery_type: pickupData.delivery_type,
       origin_address: pickupData.pickup_address,
+      origin_city: pickupData.pickup_city,
       destination_address: pickupData.destination_address,
       destination_hub: pickupData.destination_hub,
       sender: {
@@ -142,7 +143,7 @@ export class PickupService {
     if (!admin) throw new NotFoundException('Admin not found');
 
     // Verify packet is from admin's city
-    if (!pickupRequest.packet.origin_address.includes(admin.city)) {
+    if (!pickupRequest.packet.origin_city.includes(admin.city)) {
       throw new ForbiddenException(
         'You can only assign agents to packets from your city',
       );

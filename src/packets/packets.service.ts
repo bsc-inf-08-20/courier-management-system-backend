@@ -36,7 +36,7 @@ export class PacketsService {
   //     weight: packetData.weight || 0,
   //     category: packetData.category || 'other',
   //     instructions: packetData.instructions || '',
-  //     origin_address: packetData.origin_address || '',
+  //     origin_city: packetData.origin_city || '',
   //     origin_coordinates: packetData.origin_coordinates || { lat: 0, lng: 0 },
   //     destination_address: packetData.destination_address || '',
   //     destination_coordinates: packetData.destination_coordinates || { lat: 0, lng: 0 },
@@ -100,7 +100,7 @@ export class PacketsService {
     return this.packetRepository.find({
       where: [
         {
-          origin_address: Like(`%${admin.city}%`),
+          origin_city: Like(`%${admin.city}%`),
           status: Not('received'), // Show all packets from their city
         },
         {
@@ -232,6 +232,20 @@ export class PacketsService {
     return this.packetRepository.save(packet);
   }
 
+  // marked as delivered when picked
+  async picked(packetId: number, signatureBase64: string): Promise<Packet> {
+    const packet = await this.packetRepository.findOneBy({ id: packetId });
+    if (!packet) {
+      throw new NotFoundException('Packet not found');
+    }
+
+    packet.status = 'delivered';
+    packet.delivered_at = new Date();
+    packet.signature_base64 = signatureBase64; // Save the signature
+
+    return this.packetRepository.save(packet);
+  }
+
   async confirmReceiverReceived(packetId: number): Promise<Packet> {
     const packet = await this.packetRepository.findOneBy({ id: packetId });
     if (!packet) throw new NotFoundException('Packet not found');
@@ -240,7 +254,6 @@ export class PacketsService {
     }
 
     packet.status = 'received';
-    packet.received_at = new Date();
     return this.packetRepository.save(packet);
   }
 
@@ -298,7 +311,7 @@ export class PacketsService {
   //   return this.packetRepository.find({
   //     where: {
   //       status: 'at_origin_hub',
-  //       origin_address: Like(`%${city}%`),
+  //       origin_city: Like(`%${city}%`),
   //       // confirmed_by_origin: true, // Only show confirmed packets
   //     },
   //     relations: [
@@ -317,7 +330,7 @@ export class PacketsService {
     return this.packetRepository.find({
       where: {
         status: 'in_transit',
-        origin_address: Like(`%${origin}%`),
+        origin_city: Like(`%${origin}%`),
       },
       relations: [
         'pickup',
@@ -521,7 +534,7 @@ export class PacketsService {
     return this.packetRepository.find({
       where: {
         status: 'at_origin_hub',
-        origin_address: Like(`%${city}%`),
+        origin_city: Like(`%${city}%`),
       },
       relations: ['pickup', 'pickup.customer', 'assigned_vehicle'],
       order: {
@@ -594,6 +607,17 @@ export class PacketsService {
         status: 'out_for_delivery',
         destination_address: Like(`%${city}%`),
         assigned_delivery_agent: { city },
+      },
+      relations: ['assigned_delivery_agent'],
+    });
+  }
+
+  // Fetch packets delivered (already delivered)
+  async getDeliveredPackets(city: string): Promise<Packet[]> {
+    return this.packetRepository.find({
+      where: {
+        status: 'delivered',
+        destination_address: Like(`%${city}%`),
       },
       relations: ['assigned_delivery_agent'],
     });
@@ -810,7 +834,7 @@ export class PacketsService {
   }
 
   // Add this method to PacketsService
- async getPacketById(id: number): Promise<Packet> {
+  async getPacketById(id: number): Promise<Packet> {
     const packet = await this.packetRepository.findOne({
       where: { id },
       relations: [
@@ -836,5 +860,68 @@ export class PacketsService {
     }
 
     return pickupRequest;
+  }
+
+  async getAgentPickupAssignments(agentId: number): Promise<Packet[]> {
+    return this.packetRepository.find({
+      where: {
+        assigned_pickup_agent: { user_id: agentId },
+        status: In(['pending', 'collected']), // Include relevant statuses
+      },
+      relations: [
+        'assigned_pickup_agent',
+        'pickup'
+      ],
+      select: {
+        id: true,
+        trackingId: true,
+        description: true,
+        status: true,
+        weight: true,
+        category: true,
+        sender: {
+          name: true,
+          email: true,
+          phone_number: true
+        },
+        origin_address: true,
+        origin_coordinates: {
+          lat: true,
+          lng: true
+        },
+        created_at: true
+      }
+    });
+  }
+
+  async getAgentDeliveryAssignments(agentId: number): Promise<Packet[]> {
+    return this.packetRepository.find({
+      where: {
+        assigned_delivery_agent: { user_id: agentId },
+        status: In(['out_for_delivery', 'delivered']), // Include relevant statuses
+      },
+      relations: [
+        'assigned_delivery_agent'
+      ],
+      select: {
+        id: true,
+        trackingId: true,
+        description: true,
+        status: true,
+        weight: true,
+        category: true,
+        receiver: {
+          name: true,
+          email: true,
+          phone_number: true
+        },
+        destination_address: true,
+        destination_coordinates: {
+          lat: true,
+          lng: true
+        },
+        out_for_delivery_at: true
+      }
+    });
   }
 }
