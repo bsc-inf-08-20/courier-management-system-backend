@@ -396,10 +396,7 @@ export class PacketsService {
       throw new NotFoundException('Vehicle not found or unavailable');
 
     // Extract destination city from packet's destination_address (assuming format includes city)
-    const packetDestinationCity = packet.destination_address
-      .split(',')
-      .pop()
-      ?.trim();
+    const packetDestinationCity = packet.destination_hub
     if (
       vehicle.destination_city &&
       vehicle.destination_city !== packetDestinationCity
@@ -817,6 +814,8 @@ export class PacketsService {
       },
       select: [
         'id',
+        'trackingId',
+        'description',
         'destination_coordinates',
         'category',
         'created_at',
@@ -828,6 +827,8 @@ export class PacketsService {
     // Transform the data to return only needed fields
     return packets.map((packet) => ({
       id: packet.id,
+      trackingId: packet.trackingId,
+      description: packet.description,
       destination_coordinates: packet.destination_coordinates,
       category: packet.category,
       sent_date: packet.created_at,

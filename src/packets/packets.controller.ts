@@ -416,7 +416,7 @@ export class PacketsController {
     await this.emailService.sendDeliveryConfirmationToSender(
       packet.sender.email,
       {
-        trackingId: packet.id.toString(),
+        description: packet.description,
         recipientName: packet.receiver.name,
         deliveryLocation: packet.destination_address,
         deliveryTime: packet.delivered_at,
@@ -469,7 +469,7 @@ export class PacketsController {
     await this.emailService.sendPickupAssignmentNotification(
       pickup.assigned_agent.email,
       {
-        trackingId: pickup.packet.id.toString(),
+        description: pickup.packet.description,
         pickupLocation: pickup.pickup_address,
         senderName: pickup.customer.name,
         senderContact: pickup.customer.phone_number,
@@ -497,7 +497,7 @@ export class PacketsController {
     await this.emailService.sendDeliveryAssignmentNotification(
       packet.assigned_delivery_agent.email,
       {
-        trackingId: packet.id.toString(),
+        description: packet.description,
         deliveryLocation: packet.destination_address,
         recipientName: packet.receiver.name,
         recipientContact: packet.receiver.phone_number,
