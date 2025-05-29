@@ -28,8 +28,9 @@ import { EmailService } from '../email/email.service';
 
 @Controller('packets')
 export class PacketsController {
-  constructor(private readonly packetsService: PacketsService,
-    private readonly emailService: EmailService, 
+  constructor(
+    private readonly packetsService: PacketsService,
+    private readonly emailService: EmailService,
   ) {}
 
   // Post a packet from admin's panel
@@ -208,9 +209,31 @@ export class PacketsController {
   async markAsDelivered(
     @Param('id') id: string,
     @Body('signature_base64') signatureBase64: string,
-    @Request() req
+    @Body('nationalId') nationalId: string,
+    @Request() req,
   ) {
-    return this.packetsService.markAsDelivered(parseInt(id), signatureBase64);
+    return this.packetsService.markAsDelivered(
+      parseInt(id),
+      signatureBase64,
+      nationalId,
+    );
+  }
+
+  // this does also mark the packet as delivered
+  @Patch(':id/picked')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  async picked(
+    @Param('id') id: string,
+    @Body('signature_base64') signatureBase64: string,
+    @Body('nationalId') nationalId: string,
+    @Request() req,
+  ) {
+    return this.packetsService.picked(
+      parseInt(id),
+      signatureBase64,
+      nationalId,
+    );
   }
 
   @Patch(':id/received')
@@ -306,6 +329,12 @@ export class PacketsController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Get('delivered')
+  async getDeliveredPackets(@Query('city') city: string): Promise<Packet[]> {
+    return this.packetsService.getDeliveredPackets(city);
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Post('assign-delivery-agent')
   async assignDeliveryAgent(
     @Body('packetId') packetId: number,
@@ -371,6 +400,7 @@ export class PacketsController {
   // get packets that have been delivered
   // needs to be implemented
 
+  //agent delivery packet to customer - email notification
   @Post('notifications/delivery-confirmation')
   @UseGuards(JwtAuthGuard)
   async sendDeliveryConfirmation(@Body('packetId') packetId: number) {
@@ -390,16 +420,44 @@ export class PacketsController {
         recipientName: packet.receiver.name,
         deliveryLocation: packet.destination_address,
         deliveryTime: packet.delivered_at,
-      }
+      },
     );
 
     return { message: 'Delivery confirmation email sent successfully' };
   }
 
+  // customer pickup email notification
+  @Post('notifications/pickup-confirmation')
+  @UseGuards(JwtAuthGuard)
+  async sendPickupConfirmation(@Body('packetId') packetId: number) {
+    const packet = await this.packetsService.getPacketById(packetId);
+    if (!packet) {
+      throw new NotFoundException('Packet not found');
+    }
+
+    if (packet.status !== 'delivered') {
+      throw new BadRequestException('Packet is not delivered yet');
+    }
+
+    await this.emailService.sendPickupConfirmationToSender(
+      packet.sender.email,
+      {
+        trackingId: packet.id.toString(),
+        recipientName: packet.receiver.name,
+        deliveryLocation: packet.destination_address,
+        deliveryTime: packet.delivered_at,
+      },
+    );
+
+    return { message: 'Delivery confirmation email sent successfully' };
+  }
+
+  // pickup assignment email notification
   @Post('notifications/pickup-assignment')
   @UseGuards(JwtAuthGuard)
   async sendPickupAssignment(@Body('pickupRequestId') pickupRequestId: number) {
-    const pickup = await this.packetsService.getPickupRequestById(pickupRequestId);
+    const pickup =
+      await this.packetsService.getPickupRequestById(pickupRequestId);
     if (!pickup) {
       throw new NotFoundException('Pickup request not found');
     }
@@ -415,13 +473,13 @@ export class PacketsController {
         pickupLocation: pickup.pickup_address,
         senderName: pickup.customer.name,
         senderContact: pickup.customer.phone_number,
-      }
+      },
     );
 
     return { message: 'Pickup assignment notification sent successfully' };
   }
 
-  // Add this new endpoint for delivery assignment notification
+  // delivery assignment email notification
   @Post('notifications/delivery-assignment')
   @UseGuards(JwtAuthGuard)
   async sendDeliveryAssignment(@Body('packetId') packetId: number) {
@@ -431,7 +489,9 @@ export class PacketsController {
     }
 
     if (!packet.assigned_delivery_agent) {
-      throw new BadRequestException('No delivery agent assigned to this packet');
+      throw new BadRequestException(
+        'No delivery agent assigned to this packet',
+      );
     }
 
     await this.emailService.sendDeliveryAssignmentNotification(
@@ -441,11 +501,114 @@ export class PacketsController {
         deliveryLocation: packet.destination_address,
         recipientName: packet.receiver.name,
         recipientContact: packet.receiver.phone_number,
-      }
+      },
     );
 
     return { message: 'Delivery assignment notification sent successfully' };
   }
 
-  
+  @Get('agent/pickup-assignments')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.AGENT)
+  async getAgentPickupAssignments(@Request() req): Promise<Packet[]> {
+    return this.packetsService.getAgentPickupAssignments(req.user.user_id);
+  }
+
+  @Get('agent/delivery-assignments')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.AGENT)
+  async getAgentDeliveryAssignments(@Request() req): Promise<Packet[]> {
+    return this.packetsService.getAgentDeliveryAssignments(req.user.user_id);
+  }
+
+  // Packet arrival at hub email notification
+  @Post('notifications/arrival-at-hub')
+  @UseGuards(JwtAuthGuard)
+  async sendArrivalAtHubNotification(@Body('packetId') packetId: number) {
+    const packet = await this.packetsService.getPacketById(packetId);
+    if (!packet) throw new NotFoundException('Packet not found');
+    if (packet.status !== 'at_destination_hub') {
+      throw new BadRequestException('Packet has not arrived at the hub yet');
+    }
+
+    await this.emailService.sendArrivalAtHubNotification(
+      packet.receiver.email,
+      {
+        trackingId: packet.trackingId,
+        originCity: packet.origin_city,
+        destinationHub: packet.destination_hub,
+        description: packet.description,
+      },
+    );
+
+    return { message: 'Arrival at hub notification email sent successfully' };
+  }
+
+  // Booking confirmation email notification
+  @Post('notifications/booking-confirmation')
+  @UseGuards(JwtAuthGuard)
+  async sendBookingConfirmation(
+    @Body('pickupRequestId') pickupRequestId: number,
+  ) {
+    // Find the pickup request and packet/entities as needed
+    const pickup =
+      await this.packetsService.getPickupRequestById(pickupRequestId);
+    if (!pickup) throw new NotFoundException('Pickup request not found');
+    const packet = pickup.packet;
+
+    await this.emailService.sendBookingConfirmationToSender(
+      pickup.customer.email,
+      {
+        trackingId: packet.trackingId,
+        originCity: packet.origin_city,
+        destination: packet.destination_address,
+        description: packet.description,
+      },
+    );
+
+    return { message: 'Booking confirmation email sent successfully' };
+  }
+
+  // Track a packet by its tracking ID
+  @Get('track/:trackingId')
+  async trackPacket(@Param('trackingId') trackingId: string) {
+    const packet = await this.packetsService.findByTrackingId(trackingId);
+    if (!packet) throw new NotFoundException('Packet not found');
+
+    return {
+      trackingId: packet.trackingId,
+      status: packet.status,
+      sender: packet.sender,
+      receiver: packet.receiver,
+      origin_city: packet.origin_city,
+      destination_address: packet.destination_address,
+      origin_hub_confirmed_at: packet.origin_hub_confirmed_at,
+      dispatched_at: packet.dispatched_at,
+      destination_hub_confirmed_at: packet.destination_hub_confirmed_at,
+      delivered_at: packet.delivered_at,
+      pending_at: packet.created_at,
+      collected_at: packet.collected_at,
+      out_for_delivery_at: packet.out_for_delivery_at,
+    };
+  }
+
+  // Send packet receipt to both sender and receiver
+  @Post('notifications/send-packet-receipt')
+  async sendPacketReceiptToSenderAndReceiver(@Body() body: any) {
+    // body should contain all receipt details and both emails
+    const { sender, receiver, ...receiptDetails } = body;
+
+    await this.emailService.sendPacketReceipt(sender.email, {
+      ...receiptDetails,
+      sender,
+      receiver,
+    });
+    await this.emailService.sendPacketReceipt(receiver.email, {
+      ...receiptDetails,
+      sender,
+      receiver,
+    });
+
+    return { message: 'Receipt sent to both sender and receiver' };
+  }
 }
