@@ -931,4 +931,23 @@ export class PacketsService {
       }
     });
   }
+
+  // Find a packet by its tracking ID
+async findByTrackingId(trackingId: string) {
+  return this.packetRepository.findOne({
+    where: { trackingId },
+    select: [
+      'trackingId',
+      'status',
+      'sender',
+      'receiver',
+      'origin_city',
+      'destination_address',
+      'origin_hub_confirmed_at',
+      'dispatched_at',
+      'destination_hub_confirmed_at',
+      'delivered_at'
+    ]
+  });
+}
 }
