@@ -58,6 +58,10 @@ export class CreatePacketDto {
   @IsNotEmpty()
   pickup_address: string;
 
+  @IsString() 
+  @IsNotEmpty()
+  pickup_city: string; // City where the pickup is requested
+
   // Optional fields
   @IsString()
   @IsOptional()

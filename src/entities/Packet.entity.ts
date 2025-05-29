@@ -72,14 +72,16 @@ export class Packet {
   };
 
   @Column({ type: 'timestamp', nullable: true })
-pickup_window_start: Date;
+  pickup_window_start: Date;
 
-@Column({ type: 'timestamp', nullable: true })
-pickup_window_end: Date;@Column({ type: 'timestamp', nullable: true })
-
-
+  @Column({ type: 'timestamp', nullable: true })
+  pickup_window_end: Date;
+  @Column({ type: 'timestamp', nullable: true })
   @Column({ type: 'varchar', length: 50, nullable: false })
   delivery_type: 'pickup' | 'delivery';
+
+  @Column()
+  origin_city: string;
 
   @Column()
   origin_address: string;
@@ -144,16 +146,14 @@ pickup_window_end: Date;@Column({ type: 'timestamp', nullable: true })
   delivered_at: Date;
 
   @Column({ nullable: true })
-  received_at: Date;
-
-  @Column({ nullable: true })
   hub_confirmed_at: Date;
 
   @Column({ default: false })
   is_paid: boolean;
 
   @Column({ type: 'text', nullable: true })
-signature_base64: string;
+  signature_base64: string;
 
-  
+  @Column({ type: 'text', nullable: true })
+  nationalId: string;
 }
