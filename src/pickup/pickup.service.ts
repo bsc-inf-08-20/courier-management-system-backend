@@ -69,6 +69,7 @@ export class PickupService {
 
     const pickupRequest = this.pickupRepository.create({
       customer,
+      pickup_city: pickupData.pickup_city,
       pickup_address: pickupData.pickup_address,
       destination_address: pickupData.destination_address,
       packet: savedPacket,
@@ -214,7 +215,7 @@ export class PickupService {
     }
 
     return this.pickupRepository.find({
-      where: { pickup_address: city },
+      where: { pickup_city: city },
       relations: ['customer', 'assigned_agent', 'packet'],
     });
   }
