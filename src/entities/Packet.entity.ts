@@ -6,15 +6,25 @@ import {
   JoinColumn,
   ManyToOne,
   CreateDateColumn,
+  BeforeInsert,
 } from 'typeorm';
 import { PickupRequest } from './PickupRequest.entity';
 import { User } from './User.entity';
 import { Vehicle } from './Vehicle.entity';
+import { v4 as uuidv4 } from 'uuid'; // 🆕 Import UUID for tracking ID generation
 
 @Entity()
 export class Packet {
   @PrimaryGeneratedColumn()
   id: number;
+
+  @Column({ unique: true })
+  trackingId: string; // 🆕 Added for tracking
+    
+  @BeforeInsert() // ✅ Lifecycle hook to auto-generate tracking ID
+  generateTrackingId() {
+    this.trackingId = `TRK-${uuidv4().slice(0, 8).toUpperCase()}`;
+  }
 
   @Column()
   description: string;
@@ -140,4 +150,7 @@ export class Packet {
 
   @Column({ type: 'text', nullable: true })
   signature_base64: string;
+
+  @Column({ type: 'text', nullable: true })
+  nationalId: string;
 }

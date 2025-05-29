@@ -208,9 +208,10 @@ export class PacketsController {
   async markAsDelivered(
     @Param('id') id: string,
     @Body('signature_base64') signatureBase64: string,
+    @Body('nationalId') nationalId: string,
     @Request() req
   ) {
-    return this.packetsService.markAsDelivered(parseInt(id), signatureBase64);
+    return this.packetsService.markAsDelivered(parseInt(id), signatureBase64, nationalId);
   }
 
   // this does also mark the packet as delivered
@@ -220,9 +221,10 @@ export class PacketsController {
   async picked(
     @Param('id') id: string,
     @Body('signature_base64') signatureBase64: string,
+    @Body('nationalId') nationalId: string,
     @Request() req
   ) {
-    return this.packetsService.picked(parseInt(id), signatureBase64);
+    return this.packetsService.picked(parseInt(id), signatureBase64, nationalId);
   }
 
   @Patch(':id/received')
@@ -495,5 +497,40 @@ export class PacketsController {
     return { message: 'Delivery assignment notification sent successfully' };
   }
 
-  
+  @Get('agent/pickup-assignments')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.AGENT)
+  async getAgentPickupAssignments(@Request() req): Promise<Packet[]> {
+    return this.packetsService.getAgentPickupAssignments(req.user.user_id);
+  }
+
+  @Get('agent/delivery-assignments')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.AGENT)
+  async getAgentDeliveryAssignments(@Request() req): Promise<Packet[]> {
+    return this.packetsService.getAgentDeliveryAssignments(req.user.user_id);
+  }
+
+  // Packet arrival at hub email notification
+@Post('notifications/arrival-at-hub')
+@UseGuards(JwtAuthGuard)
+async sendArrivalAtHubNotification(@Body('packetId') packetId: number) {
+  const packet = await this.packetsService.getPacketById(packetId);
+  if (!packet) throw new NotFoundException('Packet not found');
+  if (packet.status !== 'at_destination_hub') {
+    throw new BadRequestException('Packet has not arrived at the hub yet');
+  }
+
+  await this.emailService.sendArrivalAtHubNotification(
+    packet.receiver.email,
+    {
+      trackingId: packet.trackingId,
+      originCity: packet.origin_city,
+      destinationHub: packet.destination_hub,
+      description: packet.description,
+    }
+  );
+
+  return { message: 'Arrival at hub notification email sent successfully' };
+}
 }

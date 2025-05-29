@@ -13,7 +13,7 @@ export class EmailService {
       pickupLocation: string;
       senderName: string;
       senderContact: string;
-    }
+    },
   ) {
     await this.mailerService.sendMail({
       to: agentEmail,
@@ -39,7 +39,7 @@ export class EmailService {
       deliveryLocation: string;
       recipientName: string;
       recipientContact: string;
-    }
+    },
   ) {
     await this.mailerService.sendMail({
       to: agentEmail,
@@ -107,5 +107,29 @@ export class EmailService {
     });
   }
 
-  
+  async sendArrivalAtHubNotification(
+    receiverEmail: string,
+    packageDetails: {
+      trackingId: string;
+      originCity: string;
+      destinationHub: string;
+      description: string;
+    },
+  ) {
+    await this.mailerService.sendMail({
+      to: receiverEmail,
+      subject: 'Your Package Has Arrived at the Destination Hub',
+      html: `
+      <h1>Package Arrival Notification</h1>
+      <p>Your package has arrived at the destination hub.</p>
+      <ul>
+        <li>Tracking ID: ${packageDetails.trackingId}</li>
+        <li>From: ${packageDetails.originCity}</li>
+        <li>To (Hub): ${packageDetails.destinationHub}</li>
+        <li>Description: ${packageDetails.description}</li>
+      </ul>
+      <p>Please visit the hub to collect your package or wait for delivery if you selected home delivery.</p>
+    `,
+    });
+  }
 }
