@@ -14,7 +14,14 @@ import { Roles } from './decorators/roles.decorator';
 import { Role } from './enum/role.enum';
 import { RolesGuard } from './auth/guards/roles.guard';
 import { LoginDto } from './dto/log-in.dto';
-import { ApiBody, ApiCreatedResponse, ApiOkResponse, ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger';
+import {
+  ApiBody,
+  ApiCreatedResponse,
+  ApiOkResponse,
+  ApiTags,
+  ApiUnauthorizedResponse,
+  ApiOperation,
+} from '@nestjs/swagger';
 
 @Controller()
 @ApiTags('Authentication')
@@ -23,6 +30,7 @@ export class AppController {
 
   @UseGuards(LocalAuthGuard)
   @Post('auth/login')
+  @ApiOperation({ summary: 'User login' })
   @ApiBody({ type: LoginDto })
   @ApiOkResponse({ description: 'User logged in successfully' })
   @ApiUnauthorizedResponse({ description: 'Invalid credentials' })
@@ -31,6 +39,7 @@ export class AppController {
   }
 
   @Post('admin/login')
+  @ApiOperation({ summary: 'Admin login' })
   @ApiBody({ type: LoginDto })
   @ApiOkResponse({ description: 'Admin logged in successfully' })
   @ApiUnauthorizedResponse({ description: 'Invalid credentials' })
@@ -43,6 +52,7 @@ export class AppController {
   }
 
   @Post('agent/login')
+  @ApiOperation({ summary: 'Agent login' })
   @ApiBody({ type: LoginDto })
   @ApiOkResponse({ description: 'Agent logged in successfully' })
   @ApiUnauthorizedResponse({ description: 'Invalid credentials' })
@@ -55,6 +65,7 @@ export class AppController {
   }
 
   @Post('customer/login')
+  @ApiOperation({ summary: 'Customer login' })
   @ApiBody({ type: LoginDto })
   @ApiOkResponse({ description: 'Customer logged in successfully' })
   @ApiUnauthorizedResponse({ description: 'Invalid credentials' })
@@ -67,6 +78,7 @@ export class AppController {
   }
 
   @Post('auth/validate-admin')
+  @ApiOperation({ summary: 'Validate admin credentials' })
   @ApiBody({
     schema: {
       type: 'object',
@@ -108,6 +120,7 @@ export class AppController {
   }
 
   @Post('auth/refresh')
+  @ApiOperation({ summary: 'Refresh token' })
   @ApiBody({
     schema: {
       type: 'object',
@@ -138,6 +151,7 @@ export class AppController {
   @UseGuards(RolesGuard)
   @UseGuards(JwtAuthGuard)
   @Get('profile')
+  @ApiOperation({ summary: 'Get user profile' })
   @ApiOkResponse({ description: 'User profile retrieved successfully' })
   getProfile(@Request() req) {
     return req.user;

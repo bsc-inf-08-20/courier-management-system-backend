@@ -32,6 +32,7 @@ import {
   ApiForbiddenResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
+  ApiOperation,
   ApiParam,
   ApiQuery,
   ApiTags,
@@ -48,6 +49,7 @@ export class PacketsController {
 
   // Post a packet from admin's panel
   @Post()
+  @ApiOperation({ summary: 'Create a new packet' })
   @ApiCreatedResponse({
     description: 'Packet created successfully',
     type: Packet,
@@ -63,6 +65,7 @@ export class PacketsController {
 
   // GET all packets
   @Get()
+  @ApiOperation({ summary: 'Get all packets' })
   @ApiOkResponse({
     description: 'All packets retrieved successfully',
     type: [Packet],
@@ -73,6 +76,7 @@ export class PacketsController {
 
   //get admins packet
   @Get('admin')
+  @ApiOperation({ summary: 'Get packets for admin' })
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   @ApiOkResponse({
@@ -87,6 +91,7 @@ export class PacketsController {
 
   // get the origin-coordinates
   @Get(':id/origin-coordinates')
+  @ApiOperation({ summary: 'Get origin coordinates for a packet' })
   @ApiParam({ name: 'id', type: 'string', description: 'Packet ID' })
   @ApiOkResponse({
     description: 'Origin coordinates retrieved successfully',
@@ -105,6 +110,7 @@ export class PacketsController {
 
   // get the destination-coordinates
   @Get(':id/destination-coordinates')
+  @ApiOperation({ summary: 'Get destination coordinates for a packet' })
   @ApiParam({ name: 'id', type: 'string', description: 'Packet ID' })
   @ApiOkResponse({
     description: 'Destination coordinates retrieved successfully',
@@ -123,6 +129,7 @@ export class PacketsController {
 
   // Admins in Lilongwe, Blantyre, or Zomba confirm dispatch:
   @Patch(':id/confirm-dispatch')
+  @ApiOperation({ summary: 'Confirm dispatch for a packet' })
   @ApiParam({ name: 'id', type: 'string', description: 'Packet ID' })
   @ApiOkResponse({
     description: 'Packet dispatch confirmed successfully',
@@ -135,6 +142,7 @@ export class PacketsController {
 
   // change/comfirm and update weight
   @Patch(':id/weight')
+  @ApiOperation({ summary: 'Update weight for a packet' })
   @ApiParam({ name: 'id', type: 'string', description: 'Packet ID' })
   @ApiBody({ type: UpdatePacketWeightDto })
   @ApiOkResponse({
@@ -158,6 +166,7 @@ export class PacketsController {
   }
 
   @Patch(':id/agent-confirm')
+  @ApiOperation({ summary: 'Agent confirms collection for a packet' })
   @ApiParam({ name: 'id', type: 'string', description: 'Packet ID' })
   @ApiBody({ type: UpdatePacketWeightDto })
   @ApiOkResponse({
@@ -181,6 +190,7 @@ export class PacketsController {
   }
 
   @Patch(':id/hub-confirm')
+  @ApiOperation({ summary: 'Admin confirms packet at hub' })
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   @ApiParam({ name: 'id', type: 'string', description: 'Packet ID' })
@@ -196,6 +206,7 @@ export class PacketsController {
   }
 
   @Patch(':id/dispatch')
+  @ApiOperation({ summary: 'Admin dispatches packet for transport' })
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   @ApiParam({ name: 'id', type: 'string', description: 'Packet ID' })
@@ -211,6 +222,7 @@ export class PacketsController {
   }
 
   @Get('at-origin-hub')
+  @ApiOperation({ summary: 'Get packets at origin hub' })
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   @ApiQuery({ name: 'city', type: 'string', description: 'Origin city' })
@@ -243,6 +255,7 @@ export class PacketsController {
   }
 
   @Get('in-transit')
+  @ApiOperation({ summary: 'Get packets in transit from origin' })
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   @ApiQuery({ name: 'origin', type: 'string', description: 'Origin city' })
@@ -275,6 +288,7 @@ export class PacketsController {
   }
 
   @Get('in-transit/incoming')
+  @ApiOperation({ summary: 'Get incoming packets in transit' })
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   @ApiQuery({ name: 'origin', type: 'string', description: 'Origin city' })
@@ -307,6 +321,7 @@ export class PacketsController {
   }
 
   @Patch(':id/destination-hub-confirm')
+  @ApiOperation({ summary: 'Confirm packet at destination hub' })
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   @ApiParam({ name: 'id', type: 'string', description: 'Packet ID' })
@@ -322,6 +337,7 @@ export class PacketsController {
   }
 
   @Patch(':id/out-for-delivery')
+  @ApiOperation({ summary: 'Mark packet out for delivery' })
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.AGENT)
   @ApiParam({ name: 'id', type: 'string', description: 'Packet ID' })
@@ -337,6 +353,7 @@ export class PacketsController {
   }
 
   @Patch(':id/mark-delivered')
+  @ApiOperation({ summary: 'Mark packet as delivered' })
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.AGENT)
   @ApiParam({ name: 'id', type: 'string', description: 'Packet ID' })
@@ -370,6 +387,7 @@ export class PacketsController {
   }
 
   @Patch(':id/picked')
+  @ApiOperation({ summary: 'Mark packet as picked' })
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   @ApiParam({ name: 'id', type: 'string', description: 'Packet ID' })
@@ -403,6 +421,7 @@ export class PacketsController {
   }
 
   @Patch(':id/received')
+  @ApiOperation({ summary: 'Confirm receiver received packet' })
   @UseGuards(JwtAuthGuard)
   @ApiParam({ name: 'id', type: 'string', description: 'Packet ID' })
   @ApiOkResponse({
@@ -416,6 +435,7 @@ export class PacketsController {
   }
 
   @Post('dispatch-batch')
+  @ApiOperation({ summary: 'Dispatch a batch of packets' })
   @Roles(Role.ADMIN)
   @ApiBody({
     schema: {
@@ -447,6 +467,7 @@ export class PacketsController {
 
   @UseGuards(JwtAuthGuard)
   @Post('assign-to-vehicle')
+  @ApiOperation({ summary: 'Assign a packet to a vehicle' })
   @ApiBody({
     schema: {
       type: 'object',
@@ -476,6 +497,7 @@ export class PacketsController {
 
   @UseGuards(JwtAuthGuard)
   @Post('assign-multiple-to-vehicle')
+  @ApiOperation({ summary: 'Assign multiple packets to a vehicle' })
   @ApiBody({
     schema: {
       type: 'object',
@@ -505,6 +527,7 @@ export class PacketsController {
 
   @UseGuards(JwtAuthGuard)
   @Post('dispatch-vehicle/:vehicleId')
+  @ApiOperation({ summary: 'Dispatch a vehicle' })
   @ApiParam({ name: 'vehicleId', type: 'string', description: 'Vehicle ID' })
   @ApiOkResponse({
     description: 'Vehicle dispatched successfully',
@@ -521,6 +544,7 @@ export class PacketsController {
 
   @UseGuards(JwtAuthGuard)
   @Get('available-vehicles')
+  @ApiOperation({ summary: 'Get available vehicles' })
   @ApiQuery({ name: 'city', type: 'string', description: 'City' })
   @ApiOkResponse({
     description: 'Available vehicles retrieved successfully',
@@ -536,6 +560,7 @@ export class PacketsController {
 
   @UseGuards(JwtAuthGuard)
   @Post('unassign-from-vehicle')
+  @ApiOperation({ summary: 'Unassign a packet from a vehicle' })
   @ApiBody({
     schema: {
       type: 'object',
@@ -560,6 +585,7 @@ export class PacketsController {
   // DEALING WITH DELIVERY
   @UseGuards(JwtAuthGuard)
   @Get('at-destination-hub')
+  @ApiOperation({ summary: 'Get packets at destination hub' })
   @ApiQuery({ name: 'city', type: 'string', description: 'City' })
   @ApiOkResponse({
     description: 'Packets at destination hub retrieved successfully',
@@ -574,6 +600,7 @@ export class PacketsController {
 
   @UseGuards(JwtAuthGuard)
   @Get('out-for-delivery')
+  @ApiOperation({ summary: 'Get packets out for delivery' })
   @ApiQuery({ name: 'city', type: 'string', description: 'City' })
   @ApiOkResponse({
     description: 'Packets out for delivery retrieved successfully',
@@ -588,6 +615,7 @@ export class PacketsController {
 
   @UseGuards(JwtAuthGuard)
   @Get('delivered')
+  @ApiOperation({ summary: 'Get delivered packets' })
   @ApiQuery({ name: 'city', type: 'string', description: 'City' })
   @ApiOkResponse({
     description: 'Delivered packets retrieved successfully',
@@ -600,6 +628,7 @@ export class PacketsController {
 
   @UseGuards(JwtAuthGuard)
   @Post('assign-delivery-agent')
+  @ApiOperation({ summary: 'Assign a delivery agent to a packet' })
   @ApiBody({
     schema: {
       type: 'object',
@@ -625,6 +654,7 @@ export class PacketsController {
 
   @UseGuards(JwtAuthGuard)
   @Post('unassign-delivery-agent')
+  @ApiOperation({ summary: 'Unassign a delivery agent from a packet' })
   @ApiBody({
     schema: {
       type: 'object',
@@ -648,6 +678,7 @@ export class PacketsController {
 
   @UseGuards(JwtAuthGuard)
   @Post('confirm-delivery')
+  @ApiOperation({ summary: 'Confirm delivery of a packet' })
   @ApiBody({
     schema: {
       type: 'object',
@@ -671,6 +702,7 @@ export class PacketsController {
 
   // get agent's packets to be collected or assingned
   @Get('agents/:id/assigned-packets')
+  @ApiOperation({ summary: 'Get assigned packets for an agent' })
   @ApiParam({ name: 'id', type: 'string', description: 'Agent ID' })
   @ApiOkResponse({
     description: 'Assigned packets retrieved successfully',
@@ -688,6 +720,7 @@ export class PacketsController {
 
   // get packets to be delivered by the agent
   @Get('agents/:id/packets-deliver')
+  @ApiOperation({ summary: 'Get packets to deliver for an agent' })
   @ApiParam({ name: 'id', type: 'string', description: 'Agent ID' })
   @ApiOkResponse({
     description: 'Packets to deliver retrieved successfully',
@@ -705,6 +738,7 @@ export class PacketsController {
 
   // paid packets
   @Patch(':id/mark-as-paid')
+  @ApiOperation({ summary: 'Mark a packet as paid' })
   @UseGuards(JwtAuthGuard)
   @ApiParam({ name: 'id', type: 'string', description: 'Packet ID' })
   @ApiOkResponse({
@@ -719,6 +753,7 @@ export class PacketsController {
 
   // get packets for delivery agent
   @Get('delivery-agent/packets')
+  @ApiOperation({ summary: 'Get packets for delivery agent' })
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.AGENT)
   @ApiOkResponse({
@@ -736,6 +771,7 @@ export class PacketsController {
 
   //agent delivery packet to customer - email notification
   @Post('notifications/delivery-confirmation')
+  @ApiOperation({ summary: 'Send delivery confirmation email' })
   @UseGuards(JwtAuthGuard)
   @ApiBody({
     schema: {
@@ -782,6 +818,7 @@ export class PacketsController {
 
   // customer pickup email notification
   @Post('notifications/pickup-confirmation')
+  @ApiOperation({ summary: 'Send pickup confirmation email' })
   @UseGuards(JwtAuthGuard)
   @ApiBody({
     schema: {
@@ -828,6 +865,7 @@ export class PacketsController {
 
   // pickup assignment email notification
   @Post('notifications/pickup-assignment')
+  @ApiOperation({ summary: 'Send pickup assignment email' })
   @UseGuards(JwtAuthGuard)
   @ApiBody({
     schema: {
@@ -875,6 +913,7 @@ export class PacketsController {
 
   // delivery assignment email notification
   @Post('notifications/delivery-assignment')
+  @ApiOperation({ summary: 'Send delivery assignment email' })
   @UseGuards(JwtAuthGuard)
   @ApiBody({
     schema: {
@@ -924,6 +963,7 @@ export class PacketsController {
   }
 
   @Get('agent/pickup-assignments')
+  @ApiOperation({ summary: 'Get pickup assignments for agent' })
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.AGENT)
   @ApiOkResponse({
@@ -937,6 +977,7 @@ export class PacketsController {
   }
 
   @Get('agent/delivery-assignments')
+  @ApiOperation({ summary: 'Get delivery assignments for agent' })
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.AGENT)
   @ApiOkResponse({
@@ -951,6 +992,7 @@ export class PacketsController {
 
   // Packet arrival at hub email notification
   @Post('notifications/arrival-at-hub')
+  @ApiOperation({ summary: 'Send arrival at hub notification email' })
   @UseGuards(JwtAuthGuard)
   @ApiBody({
     schema: {
@@ -994,6 +1036,7 @@ export class PacketsController {
 
   // Booking confirmation email notification
   @Post('notifications/booking-confirmation')
+  @ApiOperation({ summary: 'Send booking confirmation email' })
   @UseGuards(JwtAuthGuard)
   @ApiBody({
     schema: {
@@ -1038,6 +1081,7 @@ export class PacketsController {
 
   // Track a packet by its tracking ID
   @Get('track/:trackingId')
+  @ApiOperation({ summary: 'Track a packet by tracking ID' })
   @ApiParam({ name: 'trackingId', type: 'string', description: 'Tracking ID' })
   @ApiOkResponse({
     description: 'Packet details retrieved successfully',
@@ -1084,6 +1128,7 @@ export class PacketsController {
 
   // Send packet receipt to both sender and receiver
   @Post('notifications/send-packet-receipt')
+  @ApiOperation({ summary: 'Send packet receipt to sender and receiver' })
   @ApiBody({
     schema: {
       type: 'object',

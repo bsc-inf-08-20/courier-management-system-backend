@@ -26,6 +26,7 @@ import {
   ApiQuery,
   ApiTags,
   ApiUnauthorizedResponse,
+  ApiOperation,
 } from '@nestjs/swagger';
 
 @Controller('vehicles')
@@ -35,6 +36,7 @@ export class VehiclesController {
 
   // only the admin can create a vehicle
   @Post()
+  @ApiOperation({ summary: 'Create a vehicle' })
   @ApiCreatedResponse({
     description: 'Vehicle created successfully',
     type: Vehicle,
@@ -45,6 +47,7 @@ export class VehiclesController {
   }
 
   @Get()
+  @ApiOperation({ summary: 'Get all vehicles' })
   @ApiOkResponse({
     description: 'All vehicles retrieved successfully',
     type: [Vehicle],
@@ -54,6 +57,7 @@ export class VehiclesController {
   }
 
   @Get(':license_plate')
+  @ApiOperation({ summary: 'Get vehicle by license plate' })
   @ApiParam({
     name: 'license_plate',
     type: 'string',
@@ -72,6 +76,7 @@ export class VehiclesController {
 
   @UseGuards(JwtAuthGuard)
   @Get('by-city') // Changed to a distinct path to avoid conflict
+  @ApiOperation({ summary: 'Get vehicles by city' })
   @ApiQuery({ name: 'city', type: 'string', description: 'City' })
   @ApiOkResponse({
     description: 'Vehicles retrieved successfully by city',
@@ -91,6 +96,7 @@ export class VehiclesController {
 
   @UseGuards(JwtAuthGuard)
   @Put(':vehicleId/assign-driver')
+  @ApiOperation({ summary: 'Assign driver to vehicle' })
   @ApiParam({ name: 'vehicleId', type: 'number', description: 'Vehicle ID' })
   @ApiBody({
     schema: {

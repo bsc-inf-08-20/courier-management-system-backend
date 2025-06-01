@@ -30,6 +30,7 @@ import {
   ApiQuery,
   ApiTags,
   ApiUnauthorizedResponse,
+  ApiOperation,
 } from '@nestjs/swagger';
 
 @Controller('users') // Base route: /users
@@ -38,6 +39,7 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post()
+  @ApiOperation({ summary: 'Create user' })
   @ApiCreatedResponse({
     description: 'User created successfully',
     type: User,
@@ -50,6 +52,7 @@ export class UsersController {
   // get the city of the admin
   @UseGuards(JwtAuthGuard)
   @Get('me')
+  @ApiOperation({ summary: 'Get admin city' })
   @ApiOkResponse({
     description: 'Admin city retrieved successfully',
     schema: {
@@ -67,6 +70,7 @@ export class UsersController {
   // get all your details
   @UseGuards(JwtAuthGuard)
   @Get('me-data')
+  @ApiOperation({ summary: 'Get user details' })
   @ApiOkResponse({
     description: 'User details retrieved successfully',
     type: User,
@@ -78,6 +82,7 @@ export class UsersController {
 
   // Get all users
   @Get()
+  @ApiOperation({ summary: 'Get all users' })
   @ApiOkResponse({
     description: 'All users retrieved successfully',
     type: [User],
@@ -88,6 +93,7 @@ export class UsersController {
 
   // get agents by admin's city
   @Get('agents')
+  @ApiOperation({ summary: 'Get agents by city' })
   @ApiQuery({ name: 'city', type: 'string', description: 'City' })
   @ApiOkResponse({
     description: 'Agents retrieved successfully by city',
@@ -99,6 +105,7 @@ export class UsersController {
 
   // Get a single user by ID
   @Get(':id')
+  @ApiOperation({ summary: 'Get user by ID' })
   @ApiParam({ name: 'id', type: 'number', description: 'User ID' })
   @ApiOkResponse({
     description: 'User retrieved successfully by ID',
@@ -113,6 +120,7 @@ export class UsersController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   @Get('city/drivers')
+  @ApiOperation({ summary: 'Get drivers by city' })
   @ApiQuery({ name: 'city', type: 'string', description: 'City' })
   @ApiOkResponse({
     description: 'Drivers retrieved successfully by city',
@@ -136,6 +144,7 @@ export class UsersController {
   }
 
   @Patch(':id')
+  @ApiOperation({ summary: 'Update user' })
   @ApiParam({ name: 'id', type: 'number', description: 'User ID' })
   @ApiBody({ type: UpdateUserDto })
   @ApiOkResponse({
@@ -152,6 +161,7 @@ export class UsersController {
 
   // Delete a user by ID
   @Delete(':id')
+  @ApiOperation({ summary: 'Delete user' })
   @ApiParam({ name: 'id', type: 'number', description: 'User ID' })
   @ApiOkResponse({ description: 'User deleted successfully' })
   @ApiNotFoundResponse({ description: 'User not found' })
@@ -162,6 +172,7 @@ export class UsersController {
   @UseGuards(JwtAuthGuard, RolesGuard) // ✅ Protect endpoint
   @Roles(Role.ADMIN) // ✅ Only admins can access
   @Delete()
+  @ApiOperation({ summary: 'Delete all users (ADMIN ONLY)' })
   @ApiOkResponse({ description: 'All users deleted successfully' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiForbiddenResponse({ description: 'Forbidden' })
@@ -174,6 +185,7 @@ export class UsersController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN) // Only admins can access these routes
   @Get('role/user')
+  @ApiOperation({ summary: 'Get users with USER role (ADMIN ONLY)' })
   @ApiOkResponse({
     description: 'Users with USER role retrieved successfully',
     type: [User],
@@ -188,6 +200,7 @@ export class UsersController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   @Get('role/admin')
+  @ApiOperation({ summary: 'Get users with ADMIN role (ADMIN ONLY)' })
   @ApiOkResponse({
     description: 'Users with ADMIN role retrieved successfully',
     type: [User],
@@ -202,6 +215,7 @@ export class UsersController {
   // @UseGuards(JwtAuthGuard, RolesGuard)
   // @Roles(Role.ADMIN)
   @Get('role/agent')
+  @ApiOperation({ summary: 'Get users with AGENT role' })
   @ApiOkResponse({
     description: 'Users with AGENT role retrieved successfully',
     type: [User],

@@ -37,6 +37,7 @@ import {
   ApiQuery,
   ApiTags,
   ApiUnauthorizedResponse,
+  ApiOperation,
 } from '@nestjs/swagger';
 
 @Controller('pickup')
@@ -53,6 +54,7 @@ export class PickupController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.USER)
   @Post('request')
+  @ApiOperation({ summary: 'Request a pickup' })
   @ApiBody({ type: CreatePacketDto })
   @ApiCreatedResponse({
     description: 'Pickup request created successfully',
@@ -66,6 +68,7 @@ export class PickupController {
   @Patch(':id/assign')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
+  @ApiOperation({ summary: 'Assign agent to pickup request' })
   @ApiParam({ name: 'id', type: 'string', description: 'Pickup Request ID' })
   @ApiBody({ type: AssignAgentDto })
   @ApiOkResponse({
@@ -91,6 +94,7 @@ export class PickupController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.AGENT)
   @Get('assigned')
+  @ApiOperation({ summary: 'Get assigned pickups for agent' })
   @ApiOkResponse({
     description: 'Assigned pickups retrieved successfully',
     type: [PickupRequest],
@@ -105,6 +109,7 @@ export class PickupController {
   @Get('requests')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
+  @ApiOperation({ summary: 'Get pickup requests by city' })
   @ApiQuery({ name: 'city', type: 'string', description: 'City' })
   @ApiOkResponse({
     description: 'Pickup requests retrieved successfully',
@@ -120,6 +125,7 @@ export class PickupController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN) // 🔒 Only admin can access this
   @Patch(':pickupId/deliver')
+  @ApiOperation({ summary: 'Mark pickup as delivered' })
   @ApiParam({ name: 'pickupId', type: 'number', description: 'Pickup ID' })
   @ApiOkResponse({
     description: 'Pickup marked as delivered successfully',
@@ -136,6 +142,7 @@ export class PickupController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN, Role.USER)
   @Get(':pickupId/packets')
+  @ApiOperation({ summary: 'Get packets for a pickup request' })
   @ApiParam({ name: 'pickupId', type: 'number', description: 'Pickup ID' })
   @ApiOkResponse({
     description: 'Packets retrieved successfully for pickup',
@@ -155,6 +162,7 @@ export class PickupController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.AGENT)
   @Get('requests/agent')
+  @ApiOperation({ summary: 'Get requests for agent' })
   @ApiQuery({ name: 'status', type: 'string', description: 'Request Status' })
   @ApiQuery({ name: 'agentId', type: 'string', description: 'Agent ID' })
   @ApiOkResponse({
@@ -188,6 +196,7 @@ export class PickupController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN) // Only admins can access this route
   @Get('requests')
+  @ApiOperation({ summary: 'Get all pickup requests' })
   @ApiOkResponse({
     description: 'All pickup requests retrieved successfully',
     type: [PickupRequest],
@@ -201,6 +210,7 @@ export class PickupController {
   // unAssigning
   @Patch(':id/unassign')
   @Roles(Role.ADMIN)
+  @ApiOperation({ summary: 'Unassign agent from pickup request' })
   @ApiParam({ name: 'id', type: 'number', description: 'Pickup Request ID' })
   @ApiOkResponse({
     description: 'Agent unassigned from pickup request successfully',
@@ -219,6 +229,7 @@ export class PickupController {
   @Get('admin/agents')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
+  @ApiOperation({ summary: 'Get agents for admin' })
   @ApiOkResponse({
     description: 'Agents retrieved successfully for admin',
     type: [User],
