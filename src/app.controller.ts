@@ -16,7 +16,6 @@ import { RolesGuard } from './auth/guards/roles.guard';
 import { LoginDto } from './dto/log-in.dto';
 import {
   ApiBody,
-  ApiCreatedResponse,
   ApiOkResponse,
   ApiTags,
   ApiUnauthorizedResponse,
