@@ -26,8 +26,21 @@ import { UsersService } from 'src/users/users.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/entities/User.entity';
 import { Repository } from 'typeorm';
+import {
+  ApiBadRequestResponse,
+  ApiBody,
+  ApiCreatedResponse,
+  ApiForbiddenResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiParam,
+  ApiQuery,
+  ApiTags,
+  ApiUnauthorizedResponse,
+} from '@nestjs/swagger';
 
 @Controller('pickup')
+@ApiTags('Pickup')
 export class PickupController {
   constructor(
     @InjectRepository(User)
@@ -40,6 +53,12 @@ export class PickupController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.USER)
   @Post('request')
+  @ApiBody({ type: CreatePacketDto })
+  @ApiCreatedResponse({
+    description: 'Pickup request created successfully',
+    type: PickupRequest,
+  })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   async requestPickup(@Request() req, @Body() pickupData: CreatePacketDto) {
     return this.pickupService.requestPickup(req.user.user_id, pickupData);
   }
@@ -47,6 +66,15 @@ export class PickupController {
   @Patch(':id/assign')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
+  @ApiParam({ name: 'id', type: 'string', description: 'Pickup Request ID' })
+  @ApiBody({ type: AssignAgentDto })
+  @ApiOkResponse({
+    description: 'Agent assigned to pickup request successfully',
+    type: PickupRequest,
+  })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiForbiddenResponse({ description: 'Forbidden' })
+  @ApiNotFoundResponse({ description: 'Pickup request not found' })
   async assignAgentToRequest(
     @Param('id') id: string,
     @Body() assignAgentDto: AssignAgentDto,
@@ -63,6 +91,12 @@ export class PickupController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.AGENT)
   @Get('assigned')
+  @ApiOkResponse({
+    description: 'Assigned pickups retrieved successfully',
+    type: [PickupRequest],
+  })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiForbiddenResponse({ description: 'Forbidden' })
   async getAssignedPickups(@Request() req) {
     return this.pickupService.getAgentPickups(req.user.userId);
   }
@@ -71,6 +105,13 @@ export class PickupController {
   @Get('requests')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
+  @ApiQuery({ name: 'city', type: 'string', description: 'City' })
+  @ApiOkResponse({
+    description: 'Pickup requests retrieved successfully',
+    type: [PickupRequest],
+  })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiForbiddenResponse({ description: 'Forbidden' })
   async getPickupRequestsByCity(@Query('city') city: string) {
     return this.pickupService.getPickupRequestsByCity(city);
   }
@@ -79,6 +120,14 @@ export class PickupController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN) // 🔒 Only admin can access this
   @Patch(':pickupId/deliver')
+  @ApiParam({ name: 'pickupId', type: 'number', description: 'Pickup ID' })
+  @ApiOkResponse({
+    description: 'Pickup marked as delivered successfully',
+    type: PickupRequest,
+  })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiForbiddenResponse({ description: 'Forbidden' })
+  @ApiNotFoundResponse({ description: 'Pickup request not found' })
   async markAsDelivered(@Param('pickupId') pickupId: number, @Request() req) {
     return this.pickupService.markAsDelivered(pickupId, req.user.user_id);
   }
@@ -87,6 +136,14 @@ export class PickupController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN, Role.USER)
   @Get(':pickupId/packets')
+  @ApiParam({ name: 'pickupId', type: 'number', description: 'Pickup ID' })
+  @ApiOkResponse({
+    description: 'Packets retrieved successfully for pickup',
+    type: [PickupRequest],
+  })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiForbiddenResponse({ description: 'Forbidden' })
+  @ApiNotFoundResponse({ description: 'Pickup request not found' })
   async getPacketsByPickup(
     @Param('pickupId') pickupId: number,
     @Request() req,
@@ -98,6 +155,15 @@ export class PickupController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.AGENT)
   @Get('requests/agent')
+  @ApiQuery({ name: 'status', type: 'string', description: 'Request Status' })
+  @ApiQuery({ name: 'agentId', type: 'string', description: 'Agent ID' })
+  @ApiOkResponse({
+    description: 'Requests retrieved successfully for agent',
+    type: [PickupRequest],
+  })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiForbiddenResponse({ description: 'Forbidden' })
+  @ApiBadRequestResponse({ description: 'Invalid query parameters' })
   async getRequests(
     @Query('status') status: string,
     @Query('agentId') agentId: string,
@@ -122,6 +188,12 @@ export class PickupController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN) // Only admins can access this route
   @Get('requests')
+  @ApiOkResponse({
+    description: 'All pickup requests retrieved successfully',
+    type: [PickupRequest],
+  })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiForbiddenResponse({ description: 'Forbidden' })
   async getAllPickupRequests() {
     return this.pickupService.getAllPickupRequests();
   }
@@ -129,6 +201,14 @@ export class PickupController {
   // unAssigning
   @Patch(':id/unassign')
   @Roles(Role.ADMIN)
+  @ApiParam({ name: 'id', type: 'number', description: 'Pickup Request ID' })
+  @ApiOkResponse({
+    description: 'Agent unassigned from pickup request successfully',
+    type: PickupRequest,
+  })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiForbiddenResponse({ description: 'Forbidden' })
+  @ApiNotFoundResponse({ description: 'Pickup request not found' })
   async unassignAgent(
     @Param('id', ParseIntPipe) requestId: number,
   ): Promise<PickupRequest> {
@@ -139,6 +219,13 @@ export class PickupController {
   @Get('admin/agents')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
+  @ApiOkResponse({
+    description: 'Agents retrieved successfully for admin',
+    type: [User],
+  })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiForbiddenResponse({ description: 'Forbidden' })
+  @ApiNotFoundResponse({ description: 'Admin not found' })
   async getAgentsForAdmin(@Request() req) {
     const admin = await this.userRepository.findOneBy({
       user_id: req.user.user_id,
