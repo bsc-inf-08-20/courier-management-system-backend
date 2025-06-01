@@ -1,4 +1,7 @@
 // assign-driver.dto.ts
+import { ApiProperty } from '@nestjs/swagger';
+
 export class AssignDriverDto {
-    driverId: number;
-  }
+  @ApiProperty({ description: 'Driver ID' })
+  driverId: number;
+}
