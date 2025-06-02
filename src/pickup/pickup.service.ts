@@ -7,7 +7,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Not, Repository } from 'typeorm';
 import { PickupRequest } from '../entities/PickupRequest.entity';
-import { CreatePacketDto } from 'src/dto/pickup-request.dto';
+import { CreatePacketPickupDto } from 'src/dto/pickup-request.dto';
 import { User } from '../entities/User.entity';
 import { Role } from 'src/enum/role.enum';
 import { Packet } from 'src/entities/Packet.entity';
@@ -24,7 +24,7 @@ export class PickupService {
   ) {}
 
   //  Add packets when booking a pickup
-  async requestPickup(customerId: number, pickupData: CreatePacketDto) {
+  async requestPickup(customerId: number, pickupData: CreatePacketPickupDto) {
     const customer = await this.userRepository.findOne({
       where: { user_id: customerId },
     });

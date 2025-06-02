@@ -17,7 +17,7 @@ import { PickupService } from './pickup.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { Roles } from '../decorators/roles.decorator';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
-import { CreatePacketDto } from 'src/dto/pickup-request.dto';
+import { CreatePacketPickupDto } from 'src/dto/pickup-request.dto';
 import { Role } from 'src/enum/role.enum';
 import { AssignAgentDto } from 'src/dto/assign-agent.dto';
 import { PickupRequest } from 'src/entities/PickupRequest.entity';
@@ -55,13 +55,13 @@ export class PickupController {
   @Roles(Role.USER)
   @Post('request')
   @ApiOperation({ summary: 'Request a pickup' })
-  @ApiBody({ type: CreatePacketDto })
+  @ApiBody({ type: CreatePacketPickupDto })
   @ApiCreatedResponse({
     description: 'Pickup request created successfully',
     type: PickupRequest,
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
-  async requestPickup(@Request() req, @Body() pickupData: CreatePacketDto) {
+  async requestPickup(@Request() req, @Body() pickupData: CreatePacketPickupDto) {
     return this.pickupService.requestPickup(req.user.user_id, pickupData);
   }
 

@@ -36,7 +36,7 @@ export class ContactInfoDto {
   phone_number: string;
 }
 
-export class CreatePacketDto {
+export class CreatePacketPickupDto {
   // Packet information
   @ApiProperty({ description: 'Packet Description' })
   @IsString()
