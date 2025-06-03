@@ -1,0 +1,3546 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/auth/login": {
+      "post": {
+        "operationId": "AppController_login",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User logged in successfully"
+          },
+          "401": {
+            "description": "Invalid credentials"
+          }
+        },
+        "summary": "User login",
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
+    "/admin/login": {
+      "post": {
+        "operationId": "AppController_adminLogin",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Admin logged in successfully"
+          },
+          "401": {
+            "description": "Invalid credentials"
+          }
+        },
+        "summary": "Admin login",
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
+    "/agent/login": {
+      "post": {
+        "operationId": "AppController_agentLogin",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Agent logged in successfully"
+          },
+          "401": {
+            "description": "Invalid credentials"
+          }
+        },
+        "summary": "Agent login",
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
+    "/customer/login": {
+      "post": {
+        "operationId": "AppController_userLogin",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Customer logged in successfully"
+          },
+          "401": {
+            "description": "Invalid credentials"
+          }
+        },
+        "summary": "Customer login",
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
+    "/auth/validate-admin": {
+      "post": {
+        "operationId": "AppController_validateRole",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string"
+                  },
+                  "password": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "email",
+                  "password"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Admin validation successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "role": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid credentials"
+          }
+        },
+        "summary": "Validate admin credentials",
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
+    "/auth/refresh": {
+      "post": {
+        "operationId": "AppController_refresh",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "refresh_token": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "refresh_token"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Token refreshed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "access_token": {
+                      "type": "string"
+                    },
+                    "refresh_token": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Refresh token",
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
+    "/profile": {
+      "get": {
+        "operationId": "AppController_getProfile",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "User profile retrieved successfully"
+          }
+        },
+        "summary": "Get user profile",
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
+    "/users": {
+      "post": {
+        "operationId": "UsersController_createUser",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Create user",
+        "tags": [
+          "Users"
+        ]
+      },
+      "get": {
+        "operationId": "UsersController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "All users retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/User"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get all users",
+        "tags": [
+          "Users"
+        ]
+      },
+      "delete": {
+        "operationId": "UsersController_deleteAllUsers",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "All users deleted successfully"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "summary": "Delete all users (ADMIN ONLY)",
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/users/me": {
+      "get": {
+        "operationId": "UsersController_getAdminCity",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Admin city retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "city": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "summary": "Get admin city",
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/users/me-data": {
+      "get": {
+        "operationId": "UsersController_getMe",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "User details retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "summary": "Get user details",
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/users/agents": {
+      "get": {
+        "operationId": "UsersController_getAgentsByCity",
+        "parameters": [
+          {
+            "name": "city",
+            "required": true,
+            "in": "query",
+            "description": "City",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Agents retrieved successfully by city",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/User"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get agents by city",
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/users/{id}": {
+      "get": {
+        "operationId": "UsersController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "User ID",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User retrieved successfully by ID",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found"
+          }
+        },
+        "summary": "Get user by ID",
+        "tags": [
+          "Users"
+        ]
+      },
+      "patch": {
+        "operationId": "UsersController_updateUser",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "User ID",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found"
+          }
+        },
+        "summary": "Update user",
+        "tags": [
+          "Users"
+        ]
+      },
+      "delete": {
+        "operationId": "UsersController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "User ID",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User deleted successfully"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        },
+        "summary": "Delete user",
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/users/city/drivers": {
+      "get": {
+        "operationId": "UsersController_getDriversByCity",
+        "parameters": [
+          {
+            "name": "city",
+            "required": true,
+            "in": "query",
+            "description": "City",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Drivers retrieved successfully by city",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/User"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "No drivers found in this city"
+          }
+        },
+        "summary": "Get drivers by city",
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/users/role/user": {
+      "get": {
+        "operationId": "UsersController_getUsersWithUserRole",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Users with USER role retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/User"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "summary": "Get users with USER role (ADMIN ONLY)",
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/users/role/admin": {
+      "get": {
+        "operationId": "UsersController_getUsersWithAdminRole",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Users with ADMIN role retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/User"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "summary": "Get users with ADMIN role (ADMIN ONLY)",
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/users/role/agent": {
+      "get": {
+        "operationId": "UsersController_getUsersWithAgentRole",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Users with AGENT role retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/User"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get users with AGENT role",
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/pickup/request": {
+      "post": {
+        "operationId": "PickupController_requestPickup",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePacketPickupDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Pickup request created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PickupRequest"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "summary": "Request a pickup",
+        "tags": [
+          "Pickup"
+        ]
+      }
+    },
+    "/pickup/{id}/assign": {
+      "patch": {
+        "operationId": "PickupController_assignAgentToRequest",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Pickup Request ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignAgentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Agent assigned to pickup request successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PickupRequest"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Pickup request not found"
+          }
+        },
+        "summary": "Assign agent to pickup request",
+        "tags": [
+          "Pickup"
+        ]
+      }
+    },
+    "/pickup/assigned": {
+      "get": {
+        "operationId": "PickupController_getAssignedPickups",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Assigned pickups retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PickupRequest"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "summary": "Get assigned pickups for agent",
+        "tags": [
+          "Pickup"
+        ]
+      }
+    },
+    "/pickup/requests": {
+      "get": {
+        "operationId": "PickupController_getAllPickupRequests",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "All pickup requests retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PickupRequest"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "summary": "Get all pickup requests",
+        "tags": [
+          "Pickup"
+        ]
+      }
+    },
+    "/pickup/{pickupId}/deliver": {
+      "patch": {
+        "operationId": "PickupController_markAsDelivered",
+        "parameters": [
+          {
+            "name": "pickupId",
+            "required": true,
+            "in": "path",
+            "description": "Pickup ID",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Pickup marked as delivered successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PickupRequest"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Pickup request not found"
+          }
+        },
+        "summary": "Mark pickup as delivered",
+        "tags": [
+          "Pickup"
+        ]
+      }
+    },
+    "/pickup/{pickupId}/packets": {
+      "get": {
+        "operationId": "PickupController_getPacketsByPickup",
+        "parameters": [
+          {
+            "name": "pickupId",
+            "required": true,
+            "in": "path",
+            "description": "Pickup ID",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Packets retrieved successfully for pickup",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PickupRequest"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Pickup request not found"
+          }
+        },
+        "summary": "Get packets for a pickup request",
+        "tags": [
+          "Pickup"
+        ]
+      }
+    },
+    "/pickup/requests/agent": {
+      "get": {
+        "operationId": "PickupController_getRequests",
+        "parameters": [
+          {
+            "name": "status",
+            "required": true,
+            "in": "query",
+            "description": "Request Status",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "agentId",
+            "required": true,
+            "in": "query",
+            "description": "Agent ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Requests retrieved successfully for agent",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PickupRequest"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid query parameters"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "summary": "Get requests for agent",
+        "tags": [
+          "Pickup"
+        ]
+      }
+    },
+    "/pickup/{id}/unassign": {
+      "patch": {
+        "operationId": "PickupController_unassignAgent",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Pickup Request ID",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Agent unassigned from pickup request successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PickupRequest"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Pickup request not found"
+          }
+        },
+        "summary": "Unassign agent from pickup request",
+        "tags": [
+          "Pickup"
+        ]
+      }
+    },
+    "/pickup/admin/agents": {
+      "get": {
+        "operationId": "PickupController_getAgentsForAdmin",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Agents retrieved successfully for admin",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/User"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Admin not found"
+          }
+        },
+        "summary": "Get agents for admin",
+        "tags": [
+          "Pickup"
+        ]
+      }
+    },
+    "/packets": {
+      "post": {
+        "operationId": "PacketsController_createPacket",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePacketDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Packet created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Packet"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Create a new packet",
+        "tags": [
+          "Packets"
+        ]
+      },
+      "get": {
+        "operationId": "PacketsController_getAllPackets",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "All packets retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Packet"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get all packets",
+        "tags": [
+          "Packets"
+        ]
+      }
+    },
+    "/packets/admin": {
+      "get": {
+        "operationId": "PacketsController_getAdminPackets",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Admin packets retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Packet"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "summary": "Get packets for admin",
+        "tags": [
+          "Packets"
+        ]
+      }
+    },
+    "/packets/{id}/origin-coordinates": {
+      "get": {
+        "operationId": "PacketsController_getOriginCoordinates",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Packet ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Origin coordinates retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "lat": {
+                      "type": "number"
+                    },
+                    "lng": {
+                      "type": "number"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Packet not found"
+          }
+        },
+        "summary": "Get origin coordinates for a packet",
+        "tags": [
+          "Packets"
+        ]
+      }
+    },
+    "/packets/{id}/destination-coordinates": {
+      "get": {
+        "operationId": "PacketsController_getDestinationCoordinates",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Packet ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Destination coordinates retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "lat": {
+                      "type": "number"
+                    },
+                    "lng": {
+                      "type": "number"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Packet not found"
+          }
+        },
+        "summary": "Get destination coordinates for a packet",
+        "tags": [
+          "Packets"
+        ]
+      }
+    },
+    "/packets/{id}/confirm-dispatch": {
+      "patch": {
+        "operationId": "PacketsController_confirmDispatch",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Packet ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Packet dispatch confirmed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Packet"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Packet not found"
+          }
+        },
+        "summary": "Confirm dispatch for a packet",
+        "tags": [
+          "Packets"
+        ]
+      }
+    },
+    "/packets/{id}/weight": {
+      "patch": {
+        "operationId": "PacketsController_updateWeight",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Packet ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePacketWeightDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Packet weight updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Packet"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid packet ID or weight"
+          },
+          "404": {
+            "description": "Packet not found"
+          }
+        },
+        "summary": "Update weight for a packet",
+        "tags": [
+          "Packets"
+        ]
+      }
+    },
+    "/packets/{id}/agent-confirm": {
+      "patch": {
+        "operationId": "PacketsController_agentConfirmCollection",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Packet ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePacketWeightDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Agent confirmed collection successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Packet"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid packet ID"
+          },
+          "404": {
+            "description": "Packet not found"
+          }
+        },
+        "summary": "Agent confirms collection for a packet",
+        "tags": [
+          "Packets"
+        ]
+      }
+    },
+    "/packets/{id}/hub-confirm": {
+      "patch": {
+        "operationId": "PacketsController_adminConfirmAtHub",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Packet ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Admin confirmed at hub successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Packet"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Packet not found"
+          }
+        },
+        "summary": "Admin confirms packet at hub",
+        "tags": [
+          "Packets"
+        ]
+      }
+    },
+    "/packets/{id}/dispatch": {
+      "patch": {
+        "operationId": "PacketsController_adminDispatchForTransport",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Packet ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Admin dispatched for transport successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Packet"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Packet not found"
+          }
+        },
+        "summary": "Admin dispatches packet for transport",
+        "tags": [
+          "Packets"
+        ]
+      }
+    },
+    "/packets/at-origin-hub": {
+      "get": {
+        "operationId": "PacketsController_getPacketsAtOriginHub",
+        "parameters": [
+          {
+            "name": "city",
+            "required": true,
+            "in": "query",
+            "description": "Origin city",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Packets at origin hub retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Packet"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "City parameter is required"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "summary": "Get packets at origin hub",
+        "tags": [
+          "Packets"
+        ]
+      }
+    },
+    "/packets/in-transit": {
+      "get": {
+        "operationId": "PacketsController_getPacketsInTransitFromOrigin",
+        "parameters": [
+          {
+            "name": "origin",
+            "required": true,
+            "in": "query",
+            "description": "Origin city",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Packets in transit from origin retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Packet"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Origin parameter is required"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "summary": "Get packets in transit from origin",
+        "tags": [
+          "Packets"
+        ]
+      }
+    },
+    "/packets/in-transit/incoming": {
+      "get": {
+        "operationId": "PacketsController_getPacketsInTransitIncoming",
+        "parameters": [
+          {
+            "name": "origin",
+            "required": true,
+            "in": "query",
+            "description": "Origin city",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Incoming packets in transit retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Packet"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Origin parameter is required"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "summary": "Get incoming packets in transit",
+        "tags": [
+          "Packets"
+        ]
+      }
+    },
+    "/packets/{id}/destination-hub-confirm": {
+      "patch": {
+        "operationId": "PacketsController_confirmAtDestinationHub",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Packet ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Destination hub confirmed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Packet"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Packet not found"
+          }
+        },
+        "summary": "Confirm packet at destination hub",
+        "tags": [
+          "Packets"
+        ]
+      }
+    },
+    "/packets/{id}/out-for-delivery": {
+      "patch": {
+        "operationId": "PacketsController_markOutForDelivery",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Packet ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Packet marked out for delivery successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Packet"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Packet not found"
+          }
+        },
+        "summary": "Mark packet out for delivery",
+        "tags": [
+          "Packets"
+        ]
+      }
+    },
+    "/packets/{id}/mark-delivered": {
+      "patch": {
+        "operationId": "PacketsController_markAsDelivered",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Packet ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "signature_base64": {
+                    "type": "string"
+                  },
+                  "nationalId": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Packet marked as delivered successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Packet"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Packet not found"
+          }
+        },
+        "summary": "Mark packet as delivered",
+        "tags": [
+          "Packets"
+        ]
+      }
+    },
+    "/packets/{id}/picked": {
+      "patch": {
+        "operationId": "PacketsController_picked",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Packet ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "signature_base64": {
+                    "type": "string"
+                  },
+                  "nationalId": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Packet marked as picked successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Packet"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Packet not found"
+          }
+        },
+        "summary": "Mark packet as picked",
+        "tags": [
+          "Packets"
+        ]
+      }
+    },
+    "/packets/{id}/received": {
+      "patch": {
+        "operationId": "PacketsController_confirmReceiverReceived",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Packet ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Receiver confirmed packet received successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Packet"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Packet not found"
+          }
+        },
+        "summary": "Confirm receiver received packet",
+        "tags": [
+          "Packets"
+        ]
+      }
+    },
+    "/packets/dispatch-batch": {
+      "post": {
+        "operationId": "PacketsController_dispatchBatch",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "packetIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "number"
+                    }
+                  },
+                  "driverId": {
+                    "type": "number"
+                  },
+                  "vehicleId": {
+                    "type": "number"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Batch dispatched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Packet"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "summary": "Dispatch a batch of packets",
+        "tags": [
+          "Packets"
+        ]
+      }
+    },
+    "/packets/assign-to-vehicle": {
+      "post": {
+        "operationId": "PacketsController_assignPacketToVehicle",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "packetId": {
+                    "type": "number"
+                  },
+                  "vehicleId": {
+                    "type": "number"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Packet assigned to vehicle successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Packet"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Packet or Vehicle not found"
+          }
+        },
+        "summary": "Assign a packet to a vehicle",
+        "tags": [
+          "Packets"
+        ]
+      }
+    },
+    "/packets/assign-multiple-to-vehicle": {
+      "post": {
+        "operationId": "PacketsController_assignMultiplePacketsToVehicle",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "packetIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "number"
+                    }
+                  },
+                  "vehicleId": {
+                    "type": "number"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Multiple packets assigned to vehicle successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Packet"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Packet or Vehicle not found"
+          }
+        },
+        "summary": "Assign multiple packets to a vehicle",
+        "tags": [
+          "Packets"
+        ]
+      }
+    },
+    "/packets/dispatch-vehicle/{vehicleId}": {
+      "post": {
+        "operationId": "PacketsController_dispatchVehicle",
+        "parameters": [
+          {
+            "name": "vehicleId",
+            "required": true,
+            "in": "path",
+            "description": "Vehicle ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Vehicle dispatched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Vehicle"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Vehicle not found"
+          }
+        },
+        "summary": "Dispatch a vehicle",
+        "tags": [
+          "Packets"
+        ]
+      }
+    },
+    "/packets/available-vehicles": {
+      "get": {
+        "operationId": "PacketsController_getAvailableVehicles",
+        "parameters": [
+          {
+            "name": "city",
+            "required": true,
+            "in": "query",
+            "description": "City",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Available vehicles retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Vehicle"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "summary": "Get available vehicles",
+        "tags": [
+          "Packets"
+        ]
+      }
+    },
+    "/packets/unassign-from-vehicle": {
+      "post": {
+        "operationId": "PacketsController_unassignPacketFromVehicle",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "packetId": {
+                    "type": "number"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Packet unassigned from vehicle successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Packet"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Packet not found"
+          }
+        },
+        "summary": "Unassign a packet from a vehicle",
+        "tags": [
+          "Packets"
+        ]
+      }
+    },
+    "/packets/at-destination-hub": {
+      "get": {
+        "operationId": "PacketsController_getPacketsAtDestinationHub",
+        "parameters": [
+          {
+            "name": "city",
+            "required": true,
+            "in": "query",
+            "description": "City",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Packets at destination hub retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Packet"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "summary": "Get packets at destination hub",
+        "tags": [
+          "Packets"
+        ]
+      }
+    },
+    "/packets/out-for-delivery": {
+      "get": {
+        "operationId": "PacketsController_getPacketsOutForDelivery",
+        "parameters": [
+          {
+            "name": "city",
+            "required": true,
+            "in": "query",
+            "description": "City",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Packets out for delivery retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Packet"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "summary": "Get packets out for delivery",
+        "tags": [
+          "Packets"
+        ]
+      }
+    },
+    "/packets/delivered": {
+      "get": {
+        "operationId": "PacketsController_getDeliveredPackets",
+        "parameters": [
+          {
+            "name": "city",
+            "required": true,
+            "in": "query",
+            "description": "City",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Delivered packets retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Packet"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "summary": "Get delivered packets",
+        "tags": [
+          "Packets"
+        ]
+      }
+    },
+    "/packets/assign-delivery-agent": {
+      "post": {
+        "operationId": "PacketsController_assignDeliveryAgent",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "packetId": {
+                    "type": "number"
+                  },
+                  "agentId": {
+                    "type": "number"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Delivery agent assigned successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Packet"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Packet or Agent not found"
+          }
+        },
+        "summary": "Assign a delivery agent to a packet",
+        "tags": [
+          "Packets"
+        ]
+      }
+    },
+    "/packets/unassign-delivery-agent": {
+      "post": {
+        "operationId": "PacketsController_unassignDeliveryAgent",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "packetId": {
+                    "type": "number"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Delivery agent unassigned successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Packet"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Packet not found"
+          }
+        },
+        "summary": "Unassign a delivery agent from a packet",
+        "tags": [
+          "Packets"
+        ]
+      }
+    },
+    "/packets/confirm-delivery": {
+      "post": {
+        "operationId": "PacketsController_confirmDelivery",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "packetId": {
+                    "type": "number"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Delivery confirmed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Packet"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Packet not found"
+          }
+        },
+        "summary": "Confirm delivery of a packet",
+        "tags": [
+          "Packets"
+        ]
+      }
+    },
+    "/packets/agents/{id}/assigned-packets": {
+      "get": {
+        "operationId": "PacketsController_getAssignedPackets",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Agent ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Assigned packets retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Packet"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid agent ID"
+          },
+          "404": {
+            "description": "Agent not found"
+          }
+        },
+        "summary": "Get assigned packets for an agent",
+        "tags": [
+          "Packets"
+        ]
+      }
+    },
+    "/packets/agents/{id}/packets-deliver": {
+      "get": {
+        "operationId": "PacketsController_getPacketsToDeliver",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Agent ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Packets to deliver retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Packet"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid agent ID"
+          },
+          "404": {
+            "description": "Agent not found"
+          }
+        },
+        "summary": "Get packets to deliver for an agent",
+        "tags": [
+          "Packets"
+        ]
+      }
+    },
+    "/packets/{id}/mark-as-paid": {
+      "patch": {
+        "operationId": "PacketsController_markAsPaid",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Packet ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Packet marked as paid successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Packet"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Packet not found"
+          }
+        },
+        "summary": "Mark a packet as paid",
+        "tags": [
+          "Packets"
+        ]
+      }
+    },
+    "/packets/delivery-agent/packets": {
+      "get": {
+        "operationId": "PacketsController_getDeliveryAgentPackets",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Delivery agent packets retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Packet"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "summary": "Get packets for delivery agent",
+        "tags": [
+          "Packets"
+        ]
+      }
+    },
+    "/packets/notifications/delivery-confirmation": {
+      "post": {
+        "operationId": "PacketsController_sendDeliveryConfirmation",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "packetId": {
+                    "type": "number"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Delivery confirmation email sent successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Packet is not delivered yet"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Packet not found"
+          }
+        },
+        "summary": "Send delivery confirmation email",
+        "tags": [
+          "Packets"
+        ]
+      }
+    },
+    "/packets/notifications/pickup-confirmation": {
+      "post": {
+        "operationId": "PacketsController_sendPickupConfirmation",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "packetId": {
+                    "type": "number"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Pickup confirmation email sent successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Packet is not delivered yet"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Packet not found"
+          }
+        },
+        "summary": "Send pickup confirmation email",
+        "tags": [
+          "Packets"
+        ]
+      }
+    },
+    "/packets/notifications/pickup-assignment": {
+      "post": {
+        "operationId": "PacketsController_sendPickupAssignment",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "pickupRequestId": {
+                    "type": "number"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Pickup assignment notification sent successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "No agent assigned to this pickup"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Pickup request not found"
+          }
+        },
+        "summary": "Send pickup assignment email",
+        "tags": [
+          "Packets"
+        ]
+      }
+    },
+    "/packets/notifications/delivery-assignment": {
+      "post": {
+        "operationId": "PacketsController_sendDeliveryAssignment",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "packetId": {
+                    "type": "number"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Delivery assignment notification sent successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "No delivery agent assigned to this packet"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Packet not found"
+          }
+        },
+        "summary": "Send delivery assignment email",
+        "tags": [
+          "Packets"
+        ]
+      }
+    },
+    "/packets/agent/pickup-assignments": {
+      "get": {
+        "operationId": "PacketsController_getAgentPickupAssignments",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Agent pickup assignments retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Packet"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "summary": "Get pickup assignments for agent",
+        "tags": [
+          "Packets"
+        ]
+      }
+    },
+    "/packets/agent/delivery-assignments": {
+      "get": {
+        "operationId": "PacketsController_getAgentDeliveryAssignments",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Agent delivery assignments retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Packet"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "summary": "Get delivery assignments for agent",
+        "tags": [
+          "Packets"
+        ]
+      }
+    },
+    "/packets/notifications/arrival-at-hub": {
+      "post": {
+        "operationId": "PacketsController_sendArrivalAtHubNotification",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "packetId": {
+                    "type": "number"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Arrival at hub notification email sent successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Packet has not arrived at the hub yet"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Packet not found"
+          }
+        },
+        "summary": "Send arrival at hub notification email",
+        "tags": [
+          "Packets"
+        ]
+      }
+    },
+    "/packets/notifications/booking-confirmation": {
+      "post": {
+        "operationId": "PacketsController_sendBookingConfirmation",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "pickupRequestId": {
+                    "type": "number"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Booking confirmation email sent successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Pickup request not found"
+          }
+        },
+        "summary": "Send booking confirmation email",
+        "tags": [
+          "Packets"
+        ]
+      }
+    },
+    "/packets/track/{trackingId}": {
+      "get": {
+        "operationId": "PacketsController_trackPacket",
+        "parameters": [
+          {
+            "name": "trackingId",
+            "required": true,
+            "in": "path",
+            "description": "Tracking ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Packet details retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "trackingId": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "sender": {
+                      "type": "object"
+                    },
+                    "receiver": {
+                      "type": "object"
+                    },
+                    "origin_city": {
+                      "type": "string"
+                    },
+                    "destination_address": {
+                      "type": "string"
+                    },
+                    "origin_hub_confirmed_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "dispatched_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "destination_hub_confirmed_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "delivered_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "pending_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "collected_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "out_for_delivery_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Packet not found"
+          }
+        },
+        "summary": "Track a packet by tracking ID",
+        "tags": [
+          "Packets"
+        ]
+      }
+    },
+    "/packets/notifications/send-packet-receipt": {
+      "post": {
+        "operationId": "PacketsController_sendPacketReceiptToSenderAndReceiver",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "sender": {
+                    "type": "object"
+                  },
+                  "receiver": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Receipt sent to both sender and receiver",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Send packet receipt to sender and receiver",
+        "tags": [
+          "Packets"
+        ]
+      }
+    },
+    "/vehicles": {
+      "post": {
+        "operationId": "VehiclesController_createVehicle",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Vehicle"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Vehicle created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Vehicle"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Create a vehicle",
+        "tags": [
+          "Vehicles"
+        ]
+      },
+      "get": {
+        "operationId": "VehiclesController_getAllVehicles",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "All vehicles retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Vehicle"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get all vehicles",
+        "tags": [
+          "Vehicles"
+        ]
+      }
+    },
+    "/vehicles/{license_plate}": {
+      "get": {
+        "operationId": "VehiclesController_getVehicleByLicensePlate",
+        "parameters": [
+          {
+            "name": "license_plate",
+            "required": true,
+            "in": "path",
+            "description": "Vehicle License Plate",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Vehicle retrieved successfully by license plate",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Vehicle"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Vehicle not found"
+          }
+        },
+        "summary": "Get vehicle by license plate",
+        "tags": [
+          "Vehicles"
+        ]
+      }
+    },
+    "/vehicles/by-city": {
+      "get": {
+        "operationId": "VehiclesController_getVehiclesByCity",
+        "parameters": [
+          {
+            "name": "city",
+            "required": true,
+            "in": "query",
+            "description": "City",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Vehicles retrieved successfully by city",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Vehicle"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "No vehicles found in this city"
+          }
+        },
+        "summary": "Get vehicles by city",
+        "tags": [
+          "Vehicles"
+        ]
+      }
+    },
+    "/vehicles/{vehicleId}/assign-driver": {
+      "put": {
+        "operationId": "VehiclesController_assignDriver",
+        "parameters": [
+          {
+            "name": "vehicleId",
+            "required": true,
+            "in": "path",
+            "description": "Vehicle ID",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "driverId": {
+                    "type": "number"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Driver assigned to vehicle successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VehicleResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Vehicle or Driver not found"
+          }
+        },
+        "summary": "Assign driver to vehicle",
+        "tags": [
+          "Vehicles"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "Courier Management System API",
+    "description": "The Courier Management System API description",
+    "version": "1.0",
+    "contact": {}
+  },
+  "tags": [],
+  "servers": [],
+  "components": {
+    "securitySchemes": {
+      "bearer": {
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "type": "http"
+      }
+    },
+    "schemas": {
+      "LoginDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "User Email Address",
+            "example": "test@example.com"
+          },
+          "password": {
+            "type": "string",
+            "description": "User Password",
+            "minLength": 6
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ]
+      },
+      "CreateUserDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "User Name"
+          },
+          "email": {
+            "type": "string",
+            "description": "User Email"
+          },
+          "password": {
+            "type": "string",
+            "description": "User Password"
+          },
+          "phone_number": {
+            "type": "string",
+            "description": "User Phone Number"
+          },
+          "city": {
+            "type": "string",
+            "description": "User City"
+          },
+          "area": {
+            "type": "string",
+            "description": "User Area"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "USER",
+              "ADMIN",
+              "AGENT",
+              "DRIVER"
+            ],
+            "description": "User Role"
+          }
+        },
+        "required": [
+          "name",
+          "email",
+          "password",
+          "phone_number",
+          "city",
+          "area",
+          "role"
+        ]
+      },
+      "User": {
+        "type": "object",
+        "properties": {}
+      },
+      "UpdateUserDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "User Name"
+          },
+          "phone_number": {
+            "type": "string",
+            "description": "User Phone Number"
+          },
+          "address": {
+            "type": "string",
+            "description": "User Address"
+          }
+        }
+      },
+      "CoordinatesDto": {
+        "type": "object",
+        "properties": {
+          "lat": {
+            "type": "number",
+            "description": "Latitude"
+          },
+          "lng": {
+            "type": "number",
+            "description": "Longitude"
+          }
+        },
+        "required": [
+          "lat",
+          "lng"
+        ]
+      },
+      "ContactInfoDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Contact Name"
+          },
+          "email": {
+            "type": "string",
+            "description": "Contact Email"
+          },
+          "phone_number": {
+            "type": "string",
+            "description": "Contact Phone Number"
+          }
+        },
+        "required": [
+          "name",
+          "email",
+          "phone_number"
+        ]
+      },
+      "PickupWindowDto": {
+        "type": "object",
+        "properties": {
+          "start": {
+            "type": "string",
+            "description": "Pickup start time (ISO format)",
+            "example": "2025-05-10T14:00:00"
+          },
+          "end": {
+            "type": "string",
+            "description": "Pickup end time (ISO format)",
+            "example": "2025-05-10T16:00:00"
+          }
+        },
+        "required": [
+          "start",
+          "end"
+        ]
+      },
+      "CreatePacketPickupDto": {
+        "type": "object",
+        "properties": {
+          "packet_description": {
+            "type": "string",
+            "description": "Packet Description"
+          },
+          "packet_weight": {
+            "type": "number",
+            "description": "Packet Weight"
+          },
+          "packet_category": {
+            "type": "string",
+            "description": "Packet Category"
+          },
+          "instructions": {
+            "type": "string",
+            "description": "Instructions"
+          },
+          "delivery_type": {
+            "type": "string",
+            "enum": [
+              "pickup",
+              "delivery"
+            ],
+            "description": "Delivery Type"
+          },
+          "pickup_address": {
+            "type": "string",
+            "description": "Pickup Address"
+          },
+          "pickup_city": {
+            "type": "string",
+            "description": "Pickup City"
+          },
+          "destination_hub": {
+            "type": "string",
+            "description": "Destination Hub (Optional)"
+          },
+          "origin_coordinates": {
+            "description": "Origin Coordinates",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CoordinatesDto"
+              }
+            ]
+          },
+          "destination_coordinates": {
+            "description": "Destination Coordinates",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CoordinatesDto"
+              }
+            ]
+          },
+          "destination_address": {
+            "type": "string",
+            "description": "Destination Address"
+          },
+          "sender": {
+            "description": "Sender Information",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ContactInfoDto"
+              }
+            ]
+          },
+          "receiver": {
+            "description": "Receiver Information",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ContactInfoDto"
+              }
+            ]
+          },
+          "pickup_window": {
+            "description": "Pickup Window",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PickupWindowDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "packet_description",
+          "packet_weight",
+          "packet_category",
+          "instructions",
+          "delivery_type",
+          "pickup_address",
+          "pickup_city",
+          "origin_coordinates",
+          "destination_coordinates",
+          "destination_address",
+          "sender",
+          "receiver",
+          "pickup_window"
+        ]
+      },
+      "PickupRequest": {
+        "type": "object",
+        "properties": {}
+      },
+      "AssignAgentDto": {
+        "type": "object",
+        "properties": {
+          "agentId": {
+            "type": "number",
+            "description": "Agent ID"
+          }
+        },
+        "required": [
+          "agentId"
+        ]
+      },
+      "CreatePacketDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "Packet": {
+        "type": "object",
+        "properties": {}
+      },
+      "UpdatePacketWeightDto": {
+        "type": "object",
+        "properties": {
+          "weight": {
+            "type": "number",
+            "description": "Packet Weight",
+            "minimum": 0.1
+          }
+        }
+      },
+      "Vehicle": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number",
+            "description": "Vehicle ID"
+          },
+          "make": {
+            "type": "string",
+            "description": "Vehicle make"
+          },
+          "model": {
+            "type": "string",
+            "description": "Vehicle model"
+          },
+          "year": {
+            "type": "number",
+            "description": "Vehicle year"
+          },
+          "license_plate": {
+            "type": "string",
+            "description": "License plate",
+            "uniqueItems": true
+          },
+          "vehicle_type": {
+            "type": "string",
+            "description": "Vehicle type"
+          },
+          "capacity": {
+            "type": "number",
+            "description": "Vehicle capacity (kg)"
+          },
+          "is_active": {
+            "type": "boolean",
+            "description": "Is vehicle active?"
+          },
+          "is_in_maintenance": {
+            "type": "boolean",
+            "description": "Is vehicle in maintenance?"
+          },
+          "current_city": {
+            "type": "string",
+            "description": "Current city"
+          },
+          "destination_city": {
+            "type": "object",
+            "description": "Destination city"
+          },
+          "current_load": {
+            "type": "number",
+            "description": "Current load (kg)"
+          },
+          "status": {
+            "type": "string",
+            "description": "Vehicle status"
+          },
+          "assigned_driver": {
+            "type": "object",
+            "description": "Assigned driver"
+          },
+          "assigned_packets": {
+            "description": "Assigned packets",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "make",
+          "model",
+          "year",
+          "license_plate",
+          "vehicle_type",
+          "capacity",
+          "is_active",
+          "is_in_maintenance",
+          "current_city",
+          "destination_city",
+          "current_load",
+          "status",
+          "assigned_driver",
+          "assigned_packets"
+        ]
+      },
+      "SimpleDriverDto": {
+        "type": "object",
+        "properties": {
+          "user_id": {
+            "type": "number",
+            "description": "Driver ID"
+          },
+          "name": {
+            "type": "string",
+            "description": "Driver Name"
+          },
+          "email": {
+            "type": "string",
+            "description": "Driver Email"
+          },
+          "phone_number": {
+            "type": "string",
+            "description": "Driver Phone Number"
+          }
+        },
+        "required": [
+          "user_id",
+          "name",
+          "email",
+          "phone_number"
+        ]
+      },
+      "VehicleResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number",
+            "description": "Vehicle ID"
+          },
+          "make": {
+            "type": "string",
+            "description": "Vehicle Make"
+          },
+          "model": {
+            "type": "string",
+            "description": "Vehicle Model"
+          },
+          "license_plate": {
+            "type": "string",
+            "description": "Vehicle License Plate"
+          },
+          "status": {
+            "type": "string",
+            "description": "Vehicle Status"
+          },
+          "assigned_driver": {
+            "description": "Assigned Driver",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SimpleDriverDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "make",
+          "model",
+          "license_plate",
+          "status",
+          "assigned_driver"
+        ]
+      }
+    }
+  }
+}

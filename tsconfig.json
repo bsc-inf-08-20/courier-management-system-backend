@@ -17,5 +17,13 @@
     "noImplicitAny": false,
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false
-  }
+  },
+  "include": [
+    "src/**/*",
+    "generate-swagger.ts"  // Make sure this is included
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
 }
